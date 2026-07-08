@@ -1,0 +1,85 @@
+{
+  "manifest_version": 3,
+  "name": "CareerOS AI — Save Jobs",
+  "version": "1.0.0",
+  "description": "One-click save internships and jobs from LinkedIn, Wellfound, Internshala, Naukri, Indeed, Glassdoor, Greenhouse, Lever, and Ashby into CareerOS AI.",
+  "action": {
+    "default_title": "Save to CareerOS AI",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["storage", "activeTab", "scripting", "tabs", "notifications"],
+  "host_permissions": [
+    "https://*.linkedin.com/*",
+    "https://wellfound.com/*",
+    "https://*.wellfound.com/*",
+    "https://internshala.com/*",
+    "https://*.internshala.com/*",
+    "https://*.naukri.com/*",
+    "https://*.indeed.com/*",
+    "https://*.glassdoor.com/*",
+    "https://*.greenhouse.io/*",
+    "https://boards.greenhouse.io/*",
+    "https://job-boards.greenhouse.io/*",
+    "https://jobs.lever.co/*",
+    "https://*.lever.co/*",
+    "https://jobs.ashbyhq.com/*",
+    "https://*.ashbyhq.com/*",
+    "https://careeros.app/*",
+    "https://*.careeros.app/*",
+    "http://localhost:8080/*",
+    "https://oqcqrxvwbzjgtyeoavzo.supabase.co/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.linkedin.com/jobs/*",
+        "https://*.linkedin.com/job/*",
+        "https://wellfound.com/*",
+        "https://*.wellfound.com/*",
+        "https://internshala.com/*",
+        "https://*.internshala.com/*",
+        "https://*.naukri.com/*",
+        "https://*.indeed.com/*",
+        "https://*.glassdoor.com/*",
+        "https://*.greenhouse.io/*",
+        "https://boards.greenhouse.io/*",
+        "https://job-boards.greenhouse.io/*",
+        "https://jobs.lever.co/*",
+        "https://*.lever.co/*",
+        "https://jobs.ashbyhq.com/*",
+        "https://*.ashbyhq.com/*"
+      ],
+      "js": ["content-jobs.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://careeros.app/*",
+        "https://*.careeros.app/*",
+        "http://localhost:8080/*"
+      ],
+      "js": ["content-auth.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icon.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

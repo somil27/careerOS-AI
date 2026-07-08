@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+dist
+.tanstack
+.workspace
+.vercel
+coverage
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+tsconfig.tsbuildinfo
