@@ -3,11 +3,6 @@
 // (req, res) signature.
 import handler from "../dist/server/server.js";
 
-export const config = {
-  // Use the Node.js runtime — the server bundle relies on `node:async_hooks`.
-  runtime: "nodejs",
-};
-
 function buildRequest(req) {
   const proto = req.headers["x-forwarded-proto"] || "https";
   const host = req.headers["x-forwarded-host"] || req.headers.host || "localhost";
