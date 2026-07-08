@@ -70,7 +70,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "CareerOS AI — Your AI Career Operating System" },
       { name: "twitter:description", content: "Track applications, analyze resumes, generate cover letters, and prep for interviews — all in one AI-powered workspace." },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
