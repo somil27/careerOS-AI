@@ -11,8 +11,24 @@ import {
   CommandShortcut,
 } from "@/components/ui/command";
 import {
-  LayoutDashboard, Briefcase, FileText, Wand2, FileSignature, Target, MessageSquare,
-  Compass, Users, NotebookPen, BarChart3, Settings, LogOut, Sun, Moon, Monitor, Plus, Sparkles,
+  LayoutDashboard,
+  Briefcase,
+  FileText,
+  Wand2,
+  FileSignature,
+  Target,
+  MessageSquare,
+  Compass,
+  Users,
+  NotebookPen,
+  BarChart3,
+  Settings,
+  LogOut,
+  Sun,
+  Moon,
+  Monitor,
+  Plus,
+  Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -38,7 +54,13 @@ const ai: NavItem[] = [
   { to: "/ai/career-coach", label: "Career Coach", icon: Compass },
 ];
 
-export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function CommandPalette({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setTheme } = useTheme();
@@ -83,28 +105,49 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
         <CommandSeparator />
         <CommandGroup heading="Quick actions">
           <CommandItem onSelect={() => go("/applications")}>
-            <Plus /><span>New application</span>
+            <Plus />
+            <span>New application</span>
           </CommandItem>
           <CommandItem onSelect={() => go("/resumes")}>
-            <Plus /><span>Upload resume</span>
+            <Plus />
+            <span>Upload resume</span>
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Theme">
-          <CommandItem onSelect={() => { setTheme("light"); onOpenChange(false); }}>
-            <Sun /><span>Light</span>
+          <CommandItem
+            onSelect={() => {
+              setTheme("light");
+              onOpenChange(false);
+            }}
+          >
+            <Sun />
+            <span>Light</span>
           </CommandItem>
-          <CommandItem onSelect={() => { setTheme("dark"); onOpenChange(false); }}>
-            <Moon /><span>Dark</span>
+          <CommandItem
+            onSelect={() => {
+              setTheme("dark");
+              onOpenChange(false);
+            }}
+          >
+            <Moon />
+            <span>Dark</span>
           </CommandItem>
-          <CommandItem onSelect={() => { setTheme("system"); onOpenChange(false); }}>
-            <Monitor /><span>System</span>
+          <CommandItem
+            onSelect={() => {
+              setTheme("system");
+              onOpenChange(false);
+            }}
+          >
+            <Monitor />
+            <span>System</span>
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Account">
           <CommandItem onSelect={signOut}>
-            <LogOut /><span>Sign out</span>
+            <LogOut />
+            <span>Sign out</span>
           </CommandItem>
         </CommandGroup>
       </CommandList>
@@ -135,12 +178,12 @@ export function useCommandPalette() {
 
     function onKey(e: KeyboardEvent) {
       const target = e.target as HTMLElement | null;
-      const typing = target && (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable ||
-        target.tagName === "SELECT"
-      );
+      const typing =
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable ||
+          target.tagName === "SELECT");
 
       // ⌘K / Ctrl+K
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -159,7 +202,9 @@ export function useCommandPalette() {
       if (e.key.toLowerCase() === "g") {
         gMode = true;
         if (gTimer) clearTimeout(gTimer);
-        gTimer = setTimeout(() => { gMode = false; }, 1200);
+        gTimer = setTimeout(() => {
+          gMode = false;
+        }, 1200);
         return;
       }
       if (gMode) {

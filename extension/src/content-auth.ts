@@ -27,6 +27,10 @@ window.addEventListener("message", (event) => {
 
 // Announce presence so the app can render a "connected" badge.
 window.postMessage(
-  { source: "careeros-extension-present", extensionId: chrome.runtime.id, version: chrome.runtime.getManifest().version },
+  {
+    source: "careeros-extension-present",
+    extensionId: chrome.runtime.id,
+    version: chrome.runtime.getManifest().version,
+  },
   window.location.origin,
 );

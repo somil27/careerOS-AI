@@ -18,23 +18,43 @@ function verifyCareerPlan(x: any): CareerPlan {
 
 export const careerCoach = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({
-    resume_text: z.string().optional(),
-    target_role: z.string().optional(),
-    years_experience: z.number().optional(),
-    location: z.string().optional(),
-    current_title: z.string().optional(),
-    context_summary: z.string().optional(),
-  }).parse(d))
+  .validator((d: unknown) =>
+    z
+      .object({
+        resume_text: z.string().optional(),
+        target_role: z.string().optional(),
+        years_experience: z.number().optional(),
+        location: z.string().optional(),
+        current_title: z.string().optional(),
+        context_summary: z.string().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     const [{ data: apps }, { data: goals }, { data: skills }] = await Promise.all([
-      context.supabase.from("applications").select("status, company, role, created_at").order("created_at", { ascending: false }).limit(50),
-      context.supabase.from("career_goals").select("title, category, status, progress, priority, target_date").order("created_at", { ascending: false }).limit(30),
-      context.supabase.from("career_skills").select("name, category, current_level, target_level, priority").order("priority", { ascending: true }).limit(50),
+      context.supabase
+        .from("applications")
+        .select("status, company, role, created_at")
+        .order("created_at", { ascending: false })
+        .limit(50),
+      context.supabase
+        .from("career_goals")
+        .select("title, category, status, progress, priority, target_date")
+        .order("created_at", { ascending: false })
+        .limit(30),
+      context.supabase
+        .from("career_skills")
+        .select("name, category, current_level, target_level, priority")
+        .order("priority", { ascending: true })
+        .limit(50),
     ]);
-    const stats = (apps ?? []).reduce<Record<string, number>>((acc, a: any) => { acc[a.status] = (acc[a.status] ?? 0) + 1; return acc; }, {});
+    const stats = (apps ?? []).reduce<Record<string, number>>((acc, a: any) => {
+      acc[a.status] = (acc[a.status] ?? 0) + 1;
+      return acc;
+    }, {});
 
-    const system = "You are a Principal-level career strategist with FAANG hiring experience. Give specific, opinionated, evidence-based, personalized guidance. Reference the user's actual goals, skills, and application activity. Output STRICT JSON matching the schema exactly.";
+    const system =
+      "You are a Principal-level career strategist with FAANG hiring experience. Give specific, opinionated, evidence-based, personalized guidance. Reference the user's actual goals, skills, and application activity. Output STRICT JSON matching the schema exactly.";
     const user = `Build a deeply personalized career development plan.
 
 USER CONTEXT
@@ -77,7 +97,13 @@ Every recommendation must include a "why" tied to this user's context.`;
       user_id: context.userId,
       kind: "career_coach",
       title: data.target_role ? `Career plan · ${data.target_role}` : "Career plan",
-      input: { target_role: data.target_role, years_experience: data.years_experience, location: data.location, current_title: data.current_title, context_summary: data.context_summary },
+      input: {
+        target_role: data.target_role,
+        years_experience: data.years_experience,
+        location: data.location,
+        current_title: data.current_title,
+        context_summary: data.context_summary,
+      },
       output: parsed,
     });
     return parsed;

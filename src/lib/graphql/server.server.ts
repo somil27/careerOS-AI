@@ -20,37 +20,59 @@ export type Ctx = {
 
 function buildLoaders(supabase: SupabaseClient<Database>) {
   return {
-    profileById: new DataLoader<string, Database["public"]["Tables"]["profiles"]["Row"] | null>(async (ids) => {
-      const { data } = await supabase.from("profiles").select("*").in("id", ids as string[]);
-      const map = new Map((data ?? []).map((r) => [r.id, r]));
-      return ids.map((id) => map.get(id) ?? null);
-    }),
-    applicationById: new DataLoader<string, Database["public"]["Tables"]["applications"]["Row"] | null>(async (ids) => {
-      const { data } = await supabase.from("applications").select("*").in("id", ids as string[]).is("deleted_at", null);
-      const map = new Map((data ?? []).map((r) => [r.id, r]));
-      return ids.map((id) => map.get(id) ?? null);
-    }),
-    resumeById: new DataLoader<string, Database["public"]["Tables"]["resumes"]["Row"] | null>(async (ids) => {
-      const { data } = await supabase.from("resumes").select("*").in("id", ids as string[]).is("deleted_at", null);
-      const map = new Map((data ?? []).map((r) => [r.id, r]));
-      return ids.map((id) => map.get(id) ?? null);
-    }),
-    activitiesByApplication: new DataLoader<string, Database["public"]["Tables"]["application_activities"]["Row"][]>(
-      async (appIds) => {
+    profileById: new DataLoader<string, Database["public"]["Tables"]["profiles"]["Row"] | null>(
+      async (ids) => {
         const { data } = await supabase
-          .from("application_activities")
+          .from("profiles")
           .select("*")
-          .in("application_id", appIds as string[])
-          .order("created_at", { ascending: false });
-        const groups = new Map<string, Database["public"]["Tables"]["application_activities"]["Row"][]>();
-        for (const row of data ?? []) {
-          const bucket = groups.get(row.application_id) ?? [];
-          bucket.push(row);
-          groups.set(row.application_id, bucket);
-        }
-        return appIds.map((id) => groups.get(id) ?? []);
+          .in("id", ids as string[]);
+        const map = new Map((data ?? []).map((r) => [r.id, r]));
+        return ids.map((id) => map.get(id) ?? null);
       },
     ),
+    applicationById: new DataLoader<
+      string,
+      Database["public"]["Tables"]["applications"]["Row"] | null
+    >(async (ids) => {
+      const { data } = await supabase
+        .from("applications")
+        .select("*")
+        .in("id", ids as string[])
+        .is("deleted_at", null);
+      const map = new Map((data ?? []).map((r) => [r.id, r]));
+      return ids.map((id) => map.get(id) ?? null);
+    }),
+    resumeById: new DataLoader<string, Database["public"]["Tables"]["resumes"]["Row"] | null>(
+      async (ids) => {
+        const { data } = await supabase
+          .from("resumes")
+          .select("*")
+          .in("id", ids as string[])
+          .is("deleted_at", null);
+        const map = new Map((data ?? []).map((r) => [r.id, r]));
+        return ids.map((id) => map.get(id) ?? null);
+      },
+    ),
+    activitiesByApplication: new DataLoader<
+      string,
+      Database["public"]["Tables"]["application_activities"]["Row"][]
+    >(async (appIds) => {
+      const { data } = await supabase
+        .from("application_activities")
+        .select("*")
+        .in("application_id", appIds as string[])
+        .order("created_at", { ascending: false });
+      const groups = new Map<
+        string,
+        Database["public"]["Tables"]["application_activities"]["Row"][]
+      >();
+      for (const row of data ?? []) {
+        const bucket = groups.get(row.application_id) ?? [];
+        bucket.push(row);
+        groups.set(row.application_id, bucket);
+      }
+      return appIds.map((id) => groups.get(id) ?? []);
+    }),
   };
 }
 
@@ -90,7 +112,9 @@ export async function buildContext(request: Request): Promise<Ctx> {
     loaders,
     requireAuth: () => {
       if (!userId) {
-        throw new GraphQLError("Authentication required", { extensions: { code: "UNAUTHENTICATED", http: { status: 401 } } });
+        throw new GraphQLError("Authentication required", {
+          extensions: { code: "UNAUTHENTICATED", http: { status: 401 } },
+        });
       }
       return userId;
     },

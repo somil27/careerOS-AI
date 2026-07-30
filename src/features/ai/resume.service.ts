@@ -23,8 +23,21 @@ function verifyResumeAnalysis(x: any): ResumeAnalysis {
   out.experience_analysis = { ...base.experience_analysis, ...(x?.experience_analysis ?? {}) };
   out.project_analysis = { ...base.project_analysis, ...(x?.project_analysis ?? {}) };
   out.education_analysis = { ...base.education_analysis, ...(x?.education_analysis ?? {}) };
-  out.achievements_analysis = { ...base.achievements_analysis, ...(x?.achievements_analysis ?? {}) };
-  for (const k of ["strengths", "missing_skills", "keyword_match", "grammar_issues", "formatting_issues", "improvements", "keyword_heatmap", "skill_gaps", "improvement_checklist"]) {
+  out.achievements_analysis = {
+    ...base.achievements_analysis,
+    ...(x?.achievements_analysis ?? {}),
+  };
+  for (const k of [
+    "strengths",
+    "missing_skills",
+    "keyword_match",
+    "grammar_issues",
+    "formatting_issues",
+    "improvements",
+    "keyword_heatmap",
+    "skill_gaps",
+    "improvement_checklist",
+  ]) {
     if (!Array.isArray(out[k])) out[k] = [];
   }
   return out as ResumeAnalysis;
@@ -32,14 +45,19 @@ function verifyResumeAnalysis(x: any): ResumeAnalysis {
 
 export const analyzeResume = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({
-    resume_text: z.string().min(20),
-    target_role: z.string().optional(),
-    job_description: z.string().optional(),
-    resume_id: z.string().uuid().optional(),
-  }).parse(d))
+  .validator((d: unknown) =>
+    z
+      .object({
+        resume_text: z.string().min(20),
+        target_role: z.string().optional(),
+        job_description: z.string().optional(),
+        resume_id: z.string().uuid().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
-    const system = "You are a Principal-level technical recruiter, ATS specialist, and resume coach. Be precise, opinionated, and evidence-based. Output STRICT JSON matching the schema exactly.";
+    const system =
+      "You are a Principal-level technical recruiter, ATS specialist, and resume coach. Be precise, opinionated, and evidence-based. Output STRICT JSON matching the schema exactly.";
     const user = `Deeply analyze this resume${data.target_role ? ` for target role "${data.target_role}"` : ""}${data.job_description ? " against the provided job description" : ""}. Fill every field.
 
 Rules:
@@ -61,7 +79,11 @@ ${data.job_description ? `JOB DESCRIPTION:\n${data.job_description}\n\n` : ""}RE
       user_id: context.userId,
       kind: "resume_analysis",
       title: data.target_role ?? "Resume analysis",
-      input: { target_role: data.target_role, job_description: data.job_description, resume_id: data.resume_id },
+      input: {
+        target_role: data.target_role,
+        job_description: data.job_description,
+        resume_id: data.resume_id,
+      },
       output: parsed,
     });
     return parsed;
@@ -69,18 +91,32 @@ ${data.job_description ? `JOB DESCRIPTION:\n${data.job_description}\n\n` : ""}RE
 
 export const compareResumes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({
-    resume_a: z.string().min(20),
-    resume_b: z.string().min(20),
-    label_a: z.string().optional(),
-    label_b: z.string().optional(),
-    target_role: z.string().optional(),
-  }).parse(d))
+  .validator((d: unknown) =>
+    z
+      .object({
+        resume_a: z.string().min(20),
+        resume_b: z.string().min(20),
+        label_a: z.string().optional(),
+        label_b: z.string().optional(),
+        target_role: z.string().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
-    const system = "You are a senior technical recruiter comparing two resume versions. Be specific and evidence-based. Strict JSON only.";
+    const system =
+      "You are a senior technical recruiter comparing two resume versions. Be specific and evidence-based. Strict JSON only.";
     const user = `Compare Resume A ("${data.label_a ?? "A"}") vs Resume B ("${data.label_b ?? "B"}")${data.target_role ? ` for target role "${data.target_role}"` : ""}. Score both (0-100), pick a winner, list improvements B made over A, regressions, keyword_delta (added/removed keywords going A→B), and recommendations.\n\nRESUME A:\n${data.resume_a}\n\nRESUME B:\n${data.resume_b}`;
     const out = await callGemini(system, user, resumeCompareSchema);
-    const fallback = { winner: "tie", verdict: "", score_a: 0, score_b: 0, improvements_a_to_b: [], regressions_a_to_b: [], keyword_delta: { added: [], removed: [] }, recommendations: [] };
+    const fallback = {
+      winner: "tie",
+      verdict: "",
+      score_a: 0,
+      score_b: 0,
+      improvements_a_to_b: [],
+      regressions_a_to_b: [],
+      keyword_delta: { added: [], removed: [] },
+      recommendations: [],
+    };
     const parsed = parseJSON(out, fallback);
     await context.supabase.from("ai_analyses").insert({
       user_id: context.userId,

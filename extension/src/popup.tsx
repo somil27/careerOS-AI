@@ -23,14 +23,23 @@ async function extractFromActiveTab(): Promise<JobPayload | null> {
   });
 }
 
-type RecentItem = { id: string; company: string; role: string; job_url: string | null; status: string; created_at: string };
+type RecentItem = {
+  id: string;
+  company: string;
+  role: string;
+  job_url: string | null;
+  status: string;
+  created_at: string;
+};
 
 function Popup() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [job, setJob] = useState<JobPayload | null>(null);
   const [scanning, setScanning] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<{ kind: "ok" | "err" | "dup"; text: string; id?: string } | null>(null);
+  const [msg, setMsg] = useState<{ kind: "ok" | "err" | "dup"; text: string; id?: string } | null>(
+    null,
+  );
   const [recent, setRecent] = useState<RecentItem[]>([]);
 
   useEffect(() => {
@@ -67,16 +76,32 @@ function Popup() {
     if (!job) return;
     setSaving(true);
     setMsg(null);
-    const res = await send<{ ok: boolean; duplicate?: boolean; application?: { id: string }; error?: string }>({
+    const res = await send<{
+      ok: boolean;
+      duplicate?: boolean;
+      application?: { id: string };
+      error?: string;
+    }>({
       type: "job:save",
       job,
     });
     setSaving(false);
     if (!res?.ok) {
-      setMsg({ kind: "err", text: res?.error === "not_authenticated" ? "Please sign in first." : res?.error ?? "Save failed" });
+      setMsg({
+        kind: "err",
+        text:
+          res?.error === "not_authenticated"
+            ? "Please sign in first."
+            : (res?.error ?? "Save failed"),
+      });
       return;
     }
-    if (res.duplicate) setMsg({ kind: "dup", text: "Already saved — opened existing entry.", id: res.application?.id });
+    if (res.duplicate)
+      setMsg({
+        kind: "dup",
+        text: "Already saved — opened existing entry.",
+        id: res.application?.id,
+      });
     else setMsg({ kind: "ok", text: "Saved to CareerOS", id: res.application?.id });
     const r = await send<{ ok: boolean; items: RecentItem[] }>({ type: "jobs:recent" });
     if (r?.ok) setRecent(r.items);
@@ -93,9 +118,15 @@ function Popup() {
         <Header email={null} onSignOut={signOut} />
         <div className="pad">
           <h2>Connect your account</h2>
-          <p className="muted">Sign in to CareerOS AI to save jobs directly from any supported job portal.</p>
-          <button className="btn primary block" onClick={connect}>Sign in / Connect</button>
-          <div className="hint">You'll be taken to CareerOS and returned automatically once linked.</div>
+          <p className="muted">
+            Sign in to CareerOS AI to save jobs directly from any supported job portal.
+          </p>
+          <button className="btn primary block" onClick={connect}>
+            Sign in / Connect
+          </button>
+          <div className="hint">
+            You'll be taken to CareerOS and returned automatically once linked.
+          </div>
         </div>
       </div>
     );
@@ -117,13 +148,22 @@ function Popup() {
               <div className="job-title">{job!.role ?? "Untitled role"}</div>
               <div className="job-sub">
                 <span>{job!.company ?? "Unknown company"}</span>
-                {job!.location ? <><span className="dot">·</span><span>{job!.location}</span></> : null}
+                {job!.location ? (
+                  <>
+                    <span className="dot">·</span>
+                    <span>{job!.location}</span>
+                  </>
+                ) : null}
               </div>
               {job!.salary ? <div className="muted small">💰 {job!.salary}</div> : null}
               {job!.deadline ? <div className="muted small">🗓 Apply by {job!.deadline}</div> : null}
               {job!.skills.length ? (
                 <div className="chips">
-                  {job!.skills.slice(0, 8).map((s) => <span key={s} className="chip">{s}</span>)}
+                  {job!.skills.slice(0, 8).map((s) => (
+                    <span key={s} className="chip">
+                      {s}
+                    </span>
+                  ))}
                 </div>
               ) : null}
               <div className="row gap mt">
@@ -133,15 +173,26 @@ function Popup() {
               </div>
               {msg?.id ? (
                 <div className="row gap mt">
-                  <button className="btn ghost" onClick={() => openApp(`/ai/job-match?applicationId=${msg.id}`)}>AI Job Match</button>
-                  <button className="btn ghost" onClick={() => openApp(`/ai/resume-analyzer?applicationId=${msg.id}`)}>Resume Match</button>
+                  <button
+                    className="btn ghost"
+                    onClick={() => openApp(`/ai/job-match?applicationId=${msg.id}`)}
+                  >
+                    AI Job Match
+                  </button>
+                  <button
+                    className="btn ghost"
+                    onClick={() => openApp(`/ai/resume-analyzer?applicationId=${msg.id}`)}
+                  >
+                    Resume Match
+                  </button>
                 </div>
               ) : null}
               {msg ? <div className={`toast ${msg.kind}`}>{msg.text}</div> : null}
             </>
           ) : (
             <div className="muted">
-              No job posting detected here. Open a listing on LinkedIn, Wellfound, Internshala, Naukri, Indeed, Glassdoor, Greenhouse, Lever, or Ashby.
+              No job posting detected here. Open a listing on LinkedIn, Wellfound, Internshala,
+              Naukri, Indeed, Glassdoor, Greenhouse, Lever, or Ashby.
             </div>
           )}
         </section>
@@ -149,14 +200,18 @@ function Popup() {
         <section className="card">
           <div className="row between">
             <h3>Recent saves</h3>
-            <button className="link" onClick={() => openApp("/applications")}>Open Applications →</button>
+            <button className="link" onClick={() => openApp("/applications")}>
+              Open Applications →
+            </button>
           </div>
           {recent.length ? (
             <ul className="list">
               {recent.map((r) => (
                 <li key={r.id}>
                   <div className="j-title">{r.role}</div>
-                  <div className="muted small">{r.company} · {new Date(r.created_at).toLocaleDateString()}</div>
+                  <div className="muted small">
+                    {r.company} · {new Date(r.created_at).toLocaleDateString()}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -179,7 +234,11 @@ function Header({ email, onSignOut }: { email: string | null; onSignOut: () => v
           <div className="muted xs">{email ?? "Not signed in"}</div>
         </div>
       </div>
-      {email ? <button className="link" onClick={onSignOut}>Sign out</button> : null}
+      {email ? (
+        <button className="link" onClick={onSignOut}>
+          Sign out
+        </button>
+      ) : null}
     </header>
   );
 }

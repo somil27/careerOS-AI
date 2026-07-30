@@ -68,17 +68,17 @@ change away.
 
 ## Tech Stack
 
-| Layer | Stack |
-| --- | --- |
-| Framework | TanStack Start (React 19, Vite 7) |
-| Language | TypeScript (strict) |
-| Styling | Tailwind CSS v4, shadcn/ui (New York) |
-| Data | Supabase (Supabase Postgres + Auth + Storage) |
-| APIs | TanStack server functions (RPC), GraphQL Yoga at `/api/graphql` |
-| AI | Google Gemini (Gemini, GPT-family) |
-| Runtime | Cloudflare Workers with `nodejs_compat` |
-| Extension | Manifest V3, TypeScript, bun-bundled |
-| Tooling | Bun, ESLint, Prettier, tsgo |
+| Layer     | Stack                                                           |
+| --------- | --------------------------------------------------------------- |
+| Framework | TanStack Start (React 19, Vite 7)                               |
+| Language  | TypeScript (strict)                                             |
+| Styling   | Tailwind CSS v4, shadcn/ui (New York)                           |
+| Data      | Supabase (Supabase Postgres + Auth + Storage)                   |
+| APIs      | TanStack server functions (RPC), GraphQL Yoga at `/api/graphql` |
+| AI        | Google Gemini (Gemini, GPT-family)                              |
+| Runtime   | Cloudflare Workers with `nodejs_compat`                         |
+| Extension | Manifest V3, TypeScript, bun-bundled                            |
+| Tooling   | Bun, ESLint, Prettier, tsgo                                     |
 
 ## Folder Structure
 
@@ -155,14 +155,14 @@ The app boots on `http://localhost:8080`. TanStack Router regenerates
 
 Managed by Supabase in production; set locally in `.env`.
 
-| Variable | Where used | Purpose |
-| --- | --- | --- |
-| `VITE_SUPABASE_URL` | Browser | Supabase project URL. |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Browser | Anon/publishable key (safe in client). |
-| `SUPABASE_URL` | Server | Same URL, read from `process.env` in server functions. |
-| `SUPABASE_PUBLISHABLE_KEY` | Server | Publishable key for user-scoped server client. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server (`.server.ts` only) | Admin client that bypasses RLS. |
-| `GEMINI_API_KEY` | Server | Google Gemini credentials. |
+| Variable                        | Where used                 | Purpose                                                |
+| ------------------------------- | -------------------------- | ------------------------------------------------------ |
+| `VITE_SUPABASE_URL`             | Browser                    | Supabase project URL.                                  |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Browser                    | Anon/publishable key (safe in client).                 |
+| `SUPABASE_URL`                  | Server                     | Same URL, read from `process.env` in server functions. |
+| `SUPABASE_PUBLISHABLE_KEY`      | Server                     | Publishable key for user-scoped server client.         |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Server (`.server.ts` only) | Admin client that bypasses RLS.                        |
+| `GEMINI_API_KEY`                | Server                     | Google Gemini credentials.                             |
 
 Additional connector-provided secrets (e.g. `GOOGLE_MAIL_API_KEY`) are
 injected automatically when you link a connection in the CareerOS UI.
@@ -172,14 +172,14 @@ injected automatically when you link a connection in the CareerOS UI.
 > Drop screenshots into `docs/screenshots/` and reference them here.
 > Suggested captures:
 
-| Surface | Path |
-| --- | --- |
-| Dashboard & analytics | `docs/screenshots/dashboard.png` |
-| Applications tracker (kanban) | `docs/screenshots/applications.png` |
-| AI Career Coach roadmap | `docs/screenshots/career-coach.png` |
-| AI Mock Interview session | `docs/screenshots/mock-interview.png` |
-| Resume analyzer report | `docs/screenshots/resume-analyzer.png` |
-| Chrome extension popup | `docs/screenshots/extension.png` |
+| Surface                       | Path                                   |
+| ----------------------------- | -------------------------------------- |
+| Dashboard & analytics         | `docs/screenshots/dashboard.png`       |
+| Applications tracker (kanban) | `docs/screenshots/applications.png`    |
+| AI Career Coach roadmap       | `docs/screenshots/career-coach.png`    |
+| AI Mock Interview session     | `docs/screenshots/mock-interview.png`  |
+| Resume analyzer report        | `docs/screenshots/resume-analyzer.png` |
+| Chrome extension popup        | `docs/screenshots/extension.png`       |
 
 ```markdown
 ![Dashboard](./docs/screenshots/dashboard.png)
@@ -191,15 +191,15 @@ Every AI surface runs through the Google Gemini from an authenticated
 server function, with inputs validated via Zod and outputs persisted for
 audit and continuity.
 
-| Feature | Module | What it does |
-| --- | --- | --- |
-| Resume Analyzer | `features/ai/ai.functions.ts` | Strengths/gaps, ATS score, keyword coverage, action items. |
-| Resume Comparison | `features/ai/ai.functions.ts` | Side-by-side diff of two resumes with recommendations. |
-| Job Match | `features/ai/ai.functions.ts` | Role-specific match report from active resume + JD. |
-| Cover Letter Generator | `features/ai/ai.functions.ts` | Tailored, tone-adjustable letters. |
-| Interview Coach | `features/ai/ai.functions.ts` | STAR answers, question banks, per-answer scoring. |
-| Career Coach | `features/career/career.functions.ts` | Weekly/monthly roadmaps, goals, skills, recommendations. |
-| Mock Interview Studio | `features/mock-interview/mock-interview.functions.ts` | Multi-mode interviews with per-turn scoring and reports. |
+| Feature                | Module                                                | What it does                                               |
+| ---------------------- | ----------------------------------------------------- | ---------------------------------------------------------- |
+| Resume Analyzer        | `features/ai/ai.functions.ts`                         | Strengths/gaps, ATS score, keyword coverage, action items. |
+| Resume Comparison      | `features/ai/ai.functions.ts`                         | Side-by-side diff of two resumes with recommendations.     |
+| Job Match              | `features/ai/ai.functions.ts`                         | Role-specific match report from active resume + JD.        |
+| Cover Letter Generator | `features/ai/ai.functions.ts`                         | Tailored, tone-adjustable letters.                         |
+| Interview Coach        | `features/ai/ai.functions.ts`                         | STAR answers, question banks, per-answer scoring.          |
+| Career Coach           | `features/career/career.functions.ts`                 | Weekly/monthly roadmaps, goals, skills, recommendations.   |
+| Mock Interview Studio  | `features/mock-interview/mock-interview.functions.ts` | Multi-mode interviews with per-turn scoring and reports.   |
 
 ```mermaid
 sequenceDiagram
@@ -256,8 +256,20 @@ GraphiQL). Coexists with the REST/RPC surfaces — same auth, same RLS.
 ```graphql
 query MyApplications($first: Int!, $after: Cursor) {
   applications(first: $first, after: $after, orderBy: CREATED_AT_DESC) {
-    edges { cursor node { id company role status createdAt } }
-    pageInfo { hasNextPage endCursor }
+    edges {
+      cursor
+      node {
+        id
+        company
+        role
+        status
+        createdAt
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
   }
 }
 ```
@@ -332,14 +344,14 @@ Full roadmap and non-goals: [docs/future-roadmap.md](./docs/future-roadmap.md).
 
 ## Documentation
 
-| Document | Scope |
-| --- | --- |
-| [architecture.md](./docs/architecture.md) | System, modules, request lifecycle. |
-| [database.md](./docs/database.md) | Schema, RLS, migrations, access model. |
-| [api.md](./docs/api.md) | Server functions, GraphQL, extension APIs. |
-| [deployment.md](./docs/deployment.md) | Pipeline, environments, runtime. |
-| [security.md](./docs/security.md) | Threat model, authn/authz, secrets. |
-| [future-roadmap.md](./docs/future-roadmap.md) | Near-, mid-, long-term plans. |
+| Document                                      | Scope                                      |
+| --------------------------------------------- | ------------------------------------------ |
+| [architecture.md](./docs/architecture.md)     | System, modules, request lifecycle.        |
+| [database.md](./docs/database.md)             | Schema, RLS, migrations, access model.     |
+| [api.md](./docs/api.md)                       | Server functions, GraphQL, extension APIs. |
+| [deployment.md](./docs/deployment.md)         | Pipeline, environments, runtime.           |
+| [security.md](./docs/security.md)             | Threat model, authn/authz, secrets.        |
+| [future-roadmap.md](./docs/future-roadmap.md) | Near-, mid-, long-term plans.              |
 
 ## Contributing
 

@@ -5,9 +5,15 @@ import { callGemini, parseJSON as safeJSON } from "@/lib/gemini";
 
 const callAI = callGemini;
 
-
 // ============= Schemas =============
-const InterviewType = z.enum(["hr", "technical", "behavioral", "system_design", "product", "coding"]);
+const InterviewType = z.enum([
+  "hr",
+  "technical",
+  "behavioral",
+  "system_design",
+  "product",
+  "coding",
+]);
 const Difficulty = z.enum(["easy", "medium", "hard"]);
 const Mode = z.enum(["text", "voice", "webcam"]);
 
@@ -37,15 +43,17 @@ const questionsSchema = {
 export const startInterview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((raw: unknown) =>
-    z.object({
-      interview_type: InterviewType,
-      company: z.string().max(200).optional().default(""),
-      role: z.string().max(200).optional().default(""),
-      difficulty: Difficulty.default("medium"),
-      mode: Mode.default("text"),
-      resume_text: z.string().max(20000).optional().default(""),
-      job_description: z.string().max(10000).optional().default(""),
-    }).parse(raw),
+    z
+      .object({
+        interview_type: InterviewType,
+        company: z.string().max(200).optional().default(""),
+        role: z.string().max(200).optional().default(""),
+        difficulty: Difficulty.default("medium"),
+        mode: Mode.default("text"),
+        resume_text: z.string().max(20000).optional().default(""),
+        job_description: z.string().max(10000).optional().default(""),
+      })
+      .parse(raw),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -60,7 +68,10 @@ export const startInterview = createServerFn({ method: "POST" })
     const system = `You are a senior interviewer running a ${typeLabel[data.interview_type]} interview at ${data.company || "a top company"} for a ${data.role || "candidate"} role. Difficulty: ${data.difficulty}. Generate a warm 1-2 sentence intro, then 6-8 opening questions escalating in difficulty. Return strict JSON.`;
     const user = `Candidate resume:\n${data.resume_text || "(not provided)"}\n\nJob description:\n${data.job_description || "(not provided)"}\n\nProduce the intro and initial question set.`;
     const raw = await callAI(system, user, questionsSchema);
-    const parsed = safeJSON<{ intro: string; questions: Array<{ prompt: string; focus: string; difficulty: string }> }>(raw, { intro: "Let's begin.", questions: [] });
+    const parsed = safeJSON<{
+      intro: string;
+      questions: Array<{ prompt: string; focus: string; difficulty: string }>;
+    }>(raw, { intro: "Let's begin.", questions: [] });
 
     const { data: row, error } = await supabase
       .from("interview_sessions")
@@ -85,10 +96,12 @@ export const startInterview = createServerFn({ method: "POST" })
 export const nextQuestion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((raw: unknown) =>
-    z.object({
-      session_id: z.string().uuid(),
-      last_answer: z.string().max(8000),
-    }).parse(raw),
+    z
+      .object({
+        session_id: z.string().uuid(),
+        last_answer: z.string().max(8000),
+      })
+      .parse(raw),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -100,9 +113,14 @@ export const nextQuestion = createServerFn({ method: "POST" })
       .single();
     if (error || !s) throw new Error("Session not found");
 
-    const transcript = Array.isArray(s.transcript) ? (s.transcript as Array<{ role: string; content: string }>) : [];
+    const transcript = Array.isArray(s.transcript)
+      ? (s.transcript as Array<{ role: string; content: string }>)
+      : [];
     const lastQ = [...transcript].reverse().find((m) => m.role === "interviewer")?.content ?? "";
-    const updated = [...transcript, { role: "candidate", content: data.last_answer, ts: Date.now() }];
+    const updated = [
+      ...transcript,
+      { role: "candidate", content: data.last_answer, ts: Date.now() },
+    ];
 
     const system = `You are a senior ${s.interview_type} interviewer at ${s.company ?? "a top company"} for ${s.role ?? "the candidate"}. Ask ONE focused follow-up question based on the candidate's last answer, or transition to a new topic if they answered thoroughly. Keep it under 2 sentences. Return JSON: {"question": string, "should_end": boolean, "reason": string}.`;
     const user = `Recent question: ${lastQ}\n\nCandidate answered: ${data.last_answer}\n\nEntire transcript so far has ${transcript.length} turns. If we've covered 8+ meaningful exchanges, set should_end=true.`;
@@ -110,9 +128,17 @@ export const nextQuestion = createServerFn({ method: "POST" })
       type: "object",
       additionalProperties: false,
       required: ["question", "should_end", "reason"],
-      properties: { question: { type: "string" }, should_end: { type: "boolean" }, reason: { type: "string" } },
+      properties: {
+        question: { type: "string" },
+        should_end: { type: "boolean" },
+        reason: { type: "string" },
+      },
     });
-    const parsed = safeJSON<{ question: string; should_end: boolean; reason: string }>(raw, { question: "Can you tell me more?", should_end: false, reason: "" });
+    const parsed = safeJSON<{ question: string; should_end: boolean; reason: string }>(raw, {
+      question: "Can you tell me more?",
+      should_end: false,
+      reason: "",
+    });
 
     const nextTranscript = parsed.should_end
       ? updated
@@ -127,9 +153,20 @@ const analysisSchema = {
   type: "object",
   additionalProperties: false,
   required: [
-    "overall_score", "confidence_score", "communication_score", "technical_score", "behavioral_score",
-    "sentiment", "grammar_review", "vocabulary_quality", "star_evaluation",
-    "strengths", "weaknesses", "improvement_suggestions", "study_topics", "prep_plan",
+    "overall_score",
+    "confidence_score",
+    "communication_score",
+    "technical_score",
+    "behavioral_score",
+    "sentiment",
+    "grammar_review",
+    "vocabulary_quality",
+    "star_evaluation",
+    "strengths",
+    "weaknesses",
+    "improvement_suggestions",
+    "study_topics",
+    "prep_plan",
     "sample_answers",
   ],
   properties: {
@@ -162,17 +199,21 @@ const analysisSchema = {
 export const analyzeInterview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((raw: unknown) =>
-    z.object({
-      session_id: z.string().uuid(),
-      client_metrics: z.object({
-        wpm: z.number().nullable().optional(),
-        filler_count: z.number().nullable().optional(),
-        filler_words: z.record(z.string(), z.number()).optional(),
-        duration_seconds: z.number().nullable().optional(),
-        eye_contact_score: z.number().nullable().optional(),
-        facial_expression: z.string().optional(),
-      }).default({}),
-    }).parse(raw),
+    z
+      .object({
+        session_id: z.string().uuid(),
+        client_metrics: z
+          .object({
+            wpm: z.number().nullable().optional(),
+            filler_count: z.number().nullable().optional(),
+            filler_words: z.record(z.string(), z.number()).optional(),
+            duration_seconds: z.number().nullable().optional(),
+            eye_contact_score: z.number().nullable().optional(),
+            facial_expression: z.string().optional(),
+          })
+          .default({}),
+      })
+      .parse(raw),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -184,22 +225,38 @@ export const analyzeInterview = createServerFn({ method: "POST" })
       .single();
     if (error || !s) throw new Error("Session not found");
 
-    const transcript = Array.isArray(s.transcript) ? (s.transcript as Array<{ role: string; content: string }>) : [];
-    const conversation = transcript.map((t) => `${t.role === "interviewer" ? "Q" : "A"}: ${t.content}`).join("\n\n");
+    const transcript = Array.isArray(s.transcript)
+      ? (s.transcript as Array<{ role: string; content: string }>)
+      : [];
+    const conversation = transcript
+      .map((t) => `${t.role === "interviewer" ? "Q" : "A"}: ${t.content}`)
+      .join("\n\n");
     const metrics = data.client_metrics ?? {};
 
     const system = `You are an elite interview evaluator. Score each dimension 0-100 based on the transcript and objective speaking metrics. Be specific, cite exact phrases where relevant, and be honest. Return strict JSON.`;
     const user = `Interview type: ${s.interview_type}\nCompany: ${s.company ?? "-"}\nRole: ${s.role ?? "-"}\nDifficulty: ${s.difficulty}\nMode: ${s.mode}\n\nObjective metrics:\n- Words per minute: ${metrics.wpm ?? "n/a"}\n- Filler words total: ${metrics.filler_count ?? "n/a"}\n- Filler breakdown: ${JSON.stringify(metrics.filler_words ?? {})}\n- Duration (s): ${metrics.duration_seconds ?? "n/a"}\n- Eye contact score (0-100): ${metrics.eye_contact_score ?? "n/a"}\n- Facial expression summary: ${metrics.facial_expression ?? "n/a"}\n\nTranscript:\n${conversation}\n\nProduce scores + qualitative feedback + at least 3 sample better answers for the weakest responses.`;
 
     const raw = await callAI(system, user, analysisSchema);
-    const parsed = safeJSON(raw, null as unknown as {
-      overall_score: number; confidence_score: number; communication_score: number;
-      technical_score: number; behavioral_score: number;
-      sentiment: string; grammar_review: string; vocabulary_quality: string; star_evaluation: string;
-      strengths: string[]; weaknesses: string[]; improvement_suggestions: string[];
-      study_topics: string[]; prep_plan: string[];
-      sample_answers: Array<{ question: string; better_answer: string }>;
-    });
+    const parsed = safeJSON(
+      raw,
+      null as unknown as {
+        overall_score: number;
+        confidence_score: number;
+        communication_score: number;
+        technical_score: number;
+        behavioral_score: number;
+        sentiment: string;
+        grammar_review: string;
+        vocabulary_quality: string;
+        star_evaluation: string;
+        strengths: string[];
+        weaknesses: string[];
+        improvement_suggestions: string[];
+        study_topics: string[];
+        prep_plan: string[];
+        sample_answers: Array<{ question: string; better_answer: string }>;
+      },
+    );
     if (!parsed) throw new Error("Could not parse AI analysis. Try again.");
 
     const feedback = {
@@ -256,10 +313,12 @@ export const deleteInterviewSession = createServerFn({ method: "POST" })
 export const transcribeAudio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((raw: unknown) =>
-    z.object({
-      audio_base64: z.string().min(10),
-      mime: z.string().default("audio/webm"),
-    }).parse(raw),
+    z
+      .object({
+        audio_base64: z.string().min(10),
+        mime: z.string().default("audio/webm"),
+      })
+      .parse(raw),
   )
   .handler(async ({ data }) => {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -272,7 +331,9 @@ export const transcribeAudio = createServerFn({ method: "POST" })
         {
           role: "user",
           parts: [
-            { text: "Transcribe this audio verbatim. Return only the plain text transcript, no commentary." },
+            {
+              text: "Transcribe this audio verbatim. Return only the plain text transcript, no commentary.",
+            },
             { inlineData: { mimeType: data.mime, data: data.audio_base64 } },
           ],
         },
@@ -280,4 +341,3 @@ export const transcribeAudio = createServerFn({ method: "POST" })
     });
     return { text: (response.text ?? "").trim() };
   });
-

@@ -13,10 +13,26 @@ function verifyJobMatch(x: any): JobMatchResult {
   out.skills_match.score = Math.max(0, Math.min(100, Number(out.skills_match.score) || 0));
   out.technology_match = { ...base.technology_match, ...(x?.technology_match ?? {}) };
   out.technology_match.score = Math.max(0, Math.min(100, Number(out.technology_match.score) || 0));
-  out.interview_probability = { ...base.interview_probability, ...(x?.interview_probability ?? {}) };
-  out.interview_probability.score = Math.max(0, Math.min(100, Number(out.interview_probability.score) || 0));
+  out.interview_probability = {
+    ...base.interview_probability,
+    ...(x?.interview_probability ?? {}),
+  };
+  out.interview_probability.score = Math.max(
+    0,
+    Math.min(100, Number(out.interview_probability.score) || 0),
+  );
   out.salary_estimate = { ...base.salary_estimate, ...(x?.salary_estimate ?? {}) };
-  for (const k of ["missing_skills", "missing_technologies", "missing_soft_skills", "strengths", "weaknesses", "improvements", "learning_roadmap", "recommended_certifications", "recommended_projects"]) {
+  for (const k of [
+    "missing_skills",
+    "missing_technologies",
+    "missing_soft_skills",
+    "strengths",
+    "weaknesses",
+    "improvements",
+    "learning_roadmap",
+    "recommended_certifications",
+    "recommended_projects",
+  ]) {
     if (!Array.isArray(out[k])) out[k] = [];
   }
   for (const g of ["skills_match", "technology_match"] as const) {
@@ -28,16 +44,21 @@ function verifyJobMatch(x: any): JobMatchResult {
 
 export const matchJob = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({
-    resume_text: z.string().min(20),
-    job_description: z.string().min(20),
-    company: z.string().optional(),
-    role: z.string().optional(),
-    location: z.string().optional(),
-    years_experience: z.number().optional(),
-  }).parse(d))
+  .validator((d: unknown) =>
+    z
+      .object({
+        resume_text: z.string().min(20),
+        job_description: z.string().min(20),
+        company: z.string().optional(),
+        role: z.string().optional(),
+        location: z.string().optional(),
+        years_experience: z.number().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
-    const system = "You are a Principal-level technical recruiter and career strategist at a FAANG company. Be precise, opinionated, and evidence-based. Output STRICT JSON matching the schema exactly.";
+    const system =
+      "You are a Principal-level technical recruiter and career strategist at a FAANG company. Be precise, opinionated, and evidence-based. Output STRICT JSON matching the schema exactly.";
     const user = `Deeply analyze fit between the resume and the job description${data.role ? ` for ${data.role}` : ""}${data.company ? ` at ${data.company}` : ""}${data.location ? ` in ${data.location}` : ""}. Fill every field.
 
 Rules:
@@ -63,7 +84,13 @@ ${data.resume_text}`;
       user_id: context.userId,
       kind: "job_match",
       title: [data.role, data.company].filter(Boolean).join(" @ ") || "Job match",
-      input: { company: data.company, role: data.role, location: data.location, years_experience: data.years_experience, job_description: data.job_description.slice(0, 4000) },
+      input: {
+        company: data.company,
+        role: data.role,
+        location: data.location,
+        years_experience: data.years_experience,
+        job_description: data.job_description.slice(0, 4000),
+      },
       output: parsed,
     });
     return parsed;

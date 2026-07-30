@@ -8,7 +8,8 @@ const STORAGE_KEY = "careeros-theme";
 
 function resolve(theme: Theme): "light" | "dark" {
   if (theme === "system") {
-    return typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
+    return typeof window !== "undefined" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light";
   }
@@ -20,7 +21,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [resolved, setResolved] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    const stored = (typeof localStorage !== "undefined" && localStorage.getItem(STORAGE_KEY)) as Theme | null;
+    const stored = (typeof localStorage !== "undefined" &&
+      localStorage.getItem(STORAGE_KEY)) as Theme | null;
     const initial: Theme = stored ?? "system";
     setThemeState(initial);
   }, []);
@@ -47,7 +49,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   function setTheme(t: Theme) {
     setThemeState(t);
-    try { localStorage.setItem(STORAGE_KEY, t); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(STORAGE_KEY, t);
+    } catch {
+      /* ignore */
+    }
   }
 
   return <ThemeCtx.Provider value={{ theme, resolved, setTheme }}>{children}</ThemeCtx.Provider>;

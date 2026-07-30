@@ -19,7 +19,15 @@ export type App = {
   updated_at: string;
 };
 
-export const STATUSES = ["applied", "oa", "interview", "hr", "offer", "rejected", "joined"] as const;
+export const STATUSES = [
+  "applied",
+  "oa",
+  "interview",
+  "hr",
+  "offer",
+  "rejected",
+  "joined",
+] as const;
 export type Status = (typeof STATUSES)[number];
 
 export type FilterState = {
@@ -63,8 +71,18 @@ export function smartMatch(a: App, q: string): boolean {
       const hay = String((a as unknown as Record<string, unknown>)[key] ?? "").toLowerCase();
       if (!hay.includes(val)) return false;
     } else {
-      const blob = [a.company, a.role, a.location, a.recruiter, a.notes, a.status, a.referral_status]
-        .filter(Boolean).join(" ").toLowerCase();
+      const blob = [
+        a.company,
+        a.role,
+        a.location,
+        a.recruiter,
+        a.notes,
+        a.status,
+        a.referral_status,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
       if (!blob.includes(t)) return false;
     }
   }

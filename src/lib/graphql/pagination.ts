@@ -26,7 +26,11 @@ export function clampPageSize(n: number | null | undefined, def = 20, max = 100)
  * Returns { rows, hasNext, edges, pageInfo }. Fetches (limit+1) to detect a next page.
  */
 export async function paginate<Row extends { id: string; created_at: string }>(
-  buildQuery: () => Promise<{ data: Row[] | null; error: { message: string } | null; count: number | null }>,
+  buildQuery: () => Promise<{
+    data: Row[] | null;
+    error: { message: string } | null;
+    count: number | null;
+  }>,
   limit: number,
 ) {
   const { data, error, count } = await buildQuery();
@@ -34,7 +38,10 @@ export async function paginate<Row extends { id: string; created_at: string }>(
   const rows = data ?? [];
   const hasNext = rows.length > limit;
   const trimmed = hasNext ? rows.slice(0, limit) : rows;
-  const edges = trimmed.map((r) => ({ cursor: encodeCursor({ ts: r.created_at, id: r.id }), node: r }));
+  const edges = trimmed.map((r) => ({
+    cursor: encodeCursor({ ts: r.created_at, id: r.id }),
+    node: r,
+  }));
   return {
     edges,
     nodes: trimmed,

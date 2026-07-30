@@ -6,19 +6,27 @@ import { z } from "zod";
 export const getCareerProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase.from("career_profile").select("*").eq("user_id", context.userId).maybeSingle();
+    const { data } = await context.supabase
+      .from("career_profile")
+      .select("*")
+      .eq("user_id", context.userId)
+      .maybeSingle();
     return data;
   });
 
 export const upsertCareerProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({
-    target_role: z.string().nullable().optional(),
-    years_experience: z.number().nullable().optional(),
-    location: z.string().nullable().optional(),
-    current_title: z.string().nullable().optional(),
-    context_summary: z.string().nullable().optional(),
-  }).parse(d))
+  .validator((d: unknown) =>
+    z
+      .object({
+        target_role: z.string().nullable().optional(),
+        years_experience: z.number().nullable().optional(),
+        location: z.string().nullable().optional(),
+        current_title: z.string().nullable().optional(),
+        context_summary: z.string().nullable().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("career_profile")
@@ -34,7 +42,9 @@ export const listGoals = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
-      .from("career_goals").select("*").order("created_at", { ascending: false });
+      .from("career_goals")
+      .select("*")
+      .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];
   });
@@ -54,20 +64,32 @@ export const createGoal = createServerFn({ method: "POST" })
   .validator((d: unknown) => goalInput.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
-      .from("career_goals").insert({ user_id: context.userId, ...data }).select("*").single();
+      .from("career_goals")
+      .insert({ user_id: context.userId, ...data })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });
 
 export const updateGoal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({
-    id: z.string().uuid(),
-    patch: goalInput.partial(),
-  }).parse(d))
+  .validator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        patch: goalInput.partial(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
-      .from("career_goals").update(data.patch).eq("id", data.id).eq("user_id", context.userId).select("*").single();
+      .from("career_goals")
+      .update(data.patch)
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -76,7 +98,11 @@ export const deleteGoal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("career_goals").delete().eq("id", data.id).eq("user_id", context.userId);
+    const { error } = await context.supabase
+      .from("career_goals")
+      .delete()
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -86,7 +112,9 @@ export const listSkills = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
-      .from("career_skills").select("*").order("created_at", { ascending: false });
+      .from("career_skills")
+      .select("*")
+      .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];
   });
@@ -106,20 +134,32 @@ export const createSkill = createServerFn({ method: "POST" })
   .validator((d: unknown) => skillInput.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
-      .from("career_skills").insert({ user_id: context.userId, ...data }).select("*").single();
+      .from("career_skills")
+      .insert({ user_id: context.userId, ...data })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });
 
 export const updateSkill = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({
-    id: z.string().uuid(),
-    patch: skillInput.partial(),
-  }).parse(d))
+  .validator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        patch: skillInput.partial(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
-      .from("career_skills").update(data.patch).eq("id", data.id).eq("user_id", context.userId).select("*").single();
+      .from("career_skills")
+      .update(data.patch)
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -128,7 +168,11 @@ export const deleteSkill = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("career_skills").delete().eq("id", data.id).eq("user_id", context.userId);
+    const { error } = await context.supabase
+      .from("career_skills")
+      .delete()
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -138,7 +182,11 @@ export const listCareerPlans = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
-      .from("ai_analyses").select("id, title, created_at, output, input").eq("kind", "career_coach").order("created_at", { ascending: false }).limit(30);
+      .from("ai_analyses")
+      .select("id, title, created_at, output, input")
+      .eq("kind", "career_coach")
+      .order("created_at", { ascending: false })
+      .limit(30);
     if (error) throw new Error(error.message);
     return data ?? [];
   });
@@ -151,17 +199,24 @@ export const getCareerDashboard = createServerFn({ method: "GET" })
       context.supabase.from("career_goals").select("status, progress, priority"),
       context.supabase.from("career_skills").select("current_level, target_level, priority"),
       context.supabase.from("applications").select("status, created_at"),
-      context.supabase.from("ai_analyses").select("created_at").eq("kind", "career_coach").order("created_at", { ascending: false }).limit(1),
+      context.supabase
+        .from("ai_analyses")
+        .select("created_at")
+        .eq("kind", "career_coach")
+        .order("created_at", { ascending: false })
+        .limit(1),
     ]);
     const gs = goals ?? [];
     const ss = skills ?? [];
     const as = apps ?? [];
-    const goalProgress = gs.length ? Math.round(gs.reduce((s: number, g: any) => s + (g.progress || 0), 0) / gs.length) : 0;
+    const goalProgress = gs.length
+      ? Math.round(gs.reduce((s: number, g: any) => s + (g.progress || 0), 0) / gs.length)
+      : 0;
     const skillProgress = ss.length
       ? Math.round(
           ss.reduce((s: number, sk: any) => {
             const target = Math.max(1, Number(sk.target_level) || 100);
-            return s + Math.min(100, (Number(sk.current_level) || 0) / target * 100);
+            return s + Math.min(100, ((Number(sk.current_level) || 0) / target) * 100);
           }, 0) / ss.length,
         )
       : 0;
@@ -181,36 +236,67 @@ export const getCareerDashboard = createServerFn({ method: "GET" })
 // ===== Adopt AI recommendations =====
 export const adoptRecommendedGoal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({
-    title: z.string(), description: z.string().optional(), category: z.string().optional(),
-    priority: z.enum(["high", "medium", "low"]).default("medium"), timeframe_weeks: z.number().optional(),
-  }).parse(d))
+  .validator((d: unknown) =>
+    z
+      .object({
+        title: z.string(),
+        description: z.string().optional(),
+        category: z.string().optional(),
+        priority: z.enum(["high", "medium", "low"]).default("medium"),
+        timeframe_weeks: z.number().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     const target_date = data.timeframe_weeks
-      ? new Date(Date.now() + data.timeframe_weeks * 7 * 24 * 3600 * 1000).toISOString().slice(0, 10)
+      ? new Date(Date.now() + data.timeframe_weeks * 7 * 24 * 3600 * 1000)
+          .toISOString()
+          .slice(0, 10)
       : null;
     const { data: row, error } = await context.supabase
-      .from("career_goals").insert({
-        user_id: context.userId, title: data.title, description: data.description ?? null,
-        category: data.category ?? null, priority: data.priority, target_date, status: "active", progress: 0,
-      }).select("*").single();
+      .from("career_goals")
+      .insert({
+        user_id: context.userId,
+        title: data.title,
+        description: data.description ?? null,
+        category: data.category ?? null,
+        priority: data.priority,
+        target_date,
+        status: "active",
+        progress: 0,
+      })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });
 
 export const adoptRecommendedSkill = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({
-    name: z.string(), category: z.string().optional(),
-    current_level: z.number().default(0), target_level: z.number().default(100),
-    priority: z.enum(["high", "medium", "low"]).default("medium"),
-  }).parse(d))
+  .validator((d: unknown) =>
+    z
+      .object({
+        name: z.string(),
+        category: z.string().optional(),
+        current_level: z.number().default(0),
+        target_level: z.number().default(100),
+        priority: z.enum(["high", "medium", "low"]).default("medium"),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
-      .from("career_skills").insert({
-        user_id: context.userId, name: data.name, category: data.category ?? null,
-        current_level: data.current_level, target_level: data.target_level, priority: data.priority,
-      }).select("*").single();
+      .from("career_skills")
+      .insert({
+        user_id: context.userId,
+        name: data.name,
+        category: data.category ?? null,
+        current_level: data.current_level,
+        target_level: data.target_level,
+        priority: data.priority,
+      })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });

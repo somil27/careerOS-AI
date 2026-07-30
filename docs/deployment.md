@@ -103,17 +103,17 @@ resulting process. Set `PORT`, `HOST`, and the variables from
 
 See [`.env.example`](../.env.example) for the authoritative list.
 
-| Variable | Where | Notes |
-| --- | --- | --- |
-| `VITE_SUPABASE_URL` | build + client | Public — inlined into the bundle. |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | build + client | Public anon key. |
-| `VITE_SUPABASE_PROJECT_ID` | build + client | Public. |
-| `SUPABASE_URL` | server | Same value; used by SSR + server fns. |
-| `SUPABASE_PUBLISHABLE_KEY` | server | Same value; used by SSR + server fns. |
-| `SUPABASE_SERVICE_ROLE_KEY` | server (optional) | Admin ops only — never exposed. |
-| `GEMINI_API_KEY` | server | Google Gemini key for AI features. |
-| `GEMINI_MODEL` | server (optional) | Defaults to `gemini-2.0-flash`. |
-| `PORT` / `HOST` | server | HTTP bind; defaults `8080` / `0.0.0.0`. |
+| Variable                        | Where             | Notes                                   |
+| ------------------------------- | ----------------- | --------------------------------------- |
+| `VITE_SUPABASE_URL`             | build + client    | Public — inlined into the bundle.       |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | build + client    | Public anon key.                        |
+| `VITE_SUPABASE_PROJECT_ID`      | build + client    | Public.                                 |
+| `SUPABASE_URL`                  | server            | Same value; used by SSR + server fns.   |
+| `SUPABASE_PUBLISHABLE_KEY`      | server            | Same value; used by SSR + server fns.   |
+| `SUPABASE_SERVICE_ROLE_KEY`     | server (optional) | Admin ops only — never exposed.         |
+| `GEMINI_API_KEY`                | server            | Google Gemini key for AI features.      |
+| `GEMINI_MODEL`                  | server (optional) | Defaults to `gemini-2.0-flash`.         |
+| `PORT` / `HOST`                 | server            | HTTP bind; defaults `8080` / `0.0.0.0`. |
 
 `VITE_*` values must be set **at build time** because Vite inlines them
 into the client bundle. Server-only values are read at request time

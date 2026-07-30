@@ -44,21 +44,41 @@ function SharedResume() {
         setState({ kind: "error", message: e?.message ?? "Failed to load" });
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [slug, fetchShared]);
 
-  if (state.kind === "loading") return <div className="min-h-dvh grid place-items-center"><LoadingState /></div>;
-  if (state.kind === "error") return <div className="min-h-dvh grid place-items-center p-6"><ErrorState description={state.message} /></div>;
-  if (state.kind === "not_found") return (
-    <div className="min-h-dvh grid place-items-center p-6">
-      <ErrorState title="Link unavailable" description="This shared resume link is inactive or has been removed." />
-    </div>
-  );
-  if (state.kind === "expired") return (
-    <div className="min-h-dvh grid place-items-center p-6">
-      <ErrorState title="Link expired" description="The owner set an expiry on this shared link." />
-    </div>
-  );
+  if (state.kind === "loading")
+    return (
+      <div className="min-h-dvh grid place-items-center">
+        <LoadingState />
+      </div>
+    );
+  if (state.kind === "error")
+    return (
+      <div className="min-h-dvh grid place-items-center p-6">
+        <ErrorState description={state.message} />
+      </div>
+    );
+  if (state.kind === "not_found")
+    return (
+      <div className="min-h-dvh grid place-items-center p-6">
+        <ErrorState
+          title="Link unavailable"
+          description="This shared resume link is inactive or has been removed."
+        />
+      </div>
+    );
+  if (state.kind === "expired")
+    return (
+      <div className="min-h-dvh grid place-items-center p-6">
+        <ErrorState
+          title="Link expired"
+          description="The owner set an expiry on this shared link."
+        />
+      </div>
+    );
 
   const { resume, share } = state.data;
   const isPdf = resume.file_ext === "pdf";
@@ -68,22 +88,36 @@ function SharedResume() {
       <header className="border-b bg-background/80 backdrop-blur">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="size-8 rounded-md bg-primary/10 text-primary grid place-items-center"><FileText className="size-4" /></div>
+            <div className="size-8 rounded-md bg-primary/10 text-primary grid place-items-center">
+              <FileText className="size-4" />
+            </div>
             <div>
               <div className="text-sm font-semibold">{resume.name}</div>
-              <div className="text-xs text-muted-foreground">Shared via CareerOS AI · v{resume.version}</div>
+              <div className="text-xs text-muted-foreground">
+                Shared via CareerOS AI · v{resume.version}
+              </div>
             </div>
           </div>
           <div className="hidden sm:flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {share.view_count} views</span>
-            {share.expires_at ? <span className="inline-flex items-center gap-1"><Clock className="size-3.5" /> expires {formatDate(share.expires_at)}</span> : null}
+            <span className="inline-flex items-center gap-1">
+              <Eye className="size-3.5" /> {share.view_count} views
+            </span>
+            {share.expires_at ? (
+              <span className="inline-flex items-center gap-1">
+                <Clock className="size-3.5" /> expires {formatDate(share.expires_at)}
+              </span>
+            ) : null}
           </div>
         </div>
       </header>
       <main className="max-w-5xl mx-auto p-4 md:p-6">
         {resume.tags?.length ? (
           <div className="flex flex-wrap gap-1.5 mb-4">
-            {resume.tags.map((t: string) => <Badge key={t} variant="secondary">{t}</Badge>)}
+            {resume.tags.map((t: string) => (
+              <Badge key={t} variant="secondary">
+                {t}
+              </Badge>
+            ))}
           </div>
         ) : null}
         <Card>
@@ -93,7 +127,12 @@ function SharedResume() {
             ) : (
               <div className="p-6 whitespace-pre-wrap text-sm leading-6 max-h-[80vh] overflow-auto">
                 {resume.extracted_text || (
-                  <a href={resume.preview_url} className="text-primary underline" target="_blank" rel="noreferrer">
+                  <a
+                    href={resume.preview_url}
+                    className="text-primary underline"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     Download {resume.name}
                   </a>
                 )}

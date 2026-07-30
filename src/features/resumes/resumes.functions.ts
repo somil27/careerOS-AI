@@ -3,7 +3,13 @@ import { z } from "zod";
 
 export const getSharedResume = createServerFn({ method: "POST" })
   .validator((d: { slug: string; referrer?: string; userAgent?: string }) =>
-    z.object({ slug: z.string().min(1), referrer: z.string().optional(), userAgent: z.string().optional() }).parse(d),
+    z
+      .object({
+        slug: z.string().min(1),
+        referrer: z.string().optional(),
+        userAgent: z.string().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

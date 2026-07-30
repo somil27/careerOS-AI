@@ -41,9 +41,12 @@ function extractJsonLd(): Partial<JobPayload> {
           company: clean(item.hiringOrganization?.name),
           location: clean(typeof loc === "string" ? loc : null),
           salary: salary ? clean(`${salaryCurrency} ${salary} ${salaryUnit}`.trim()) : null,
-          description: item.description ? stripHtml(String(item.description)).slice(0, 20000) : null,
+          description: item.description
+            ? stripHtml(String(item.description)).slice(0, 20000)
+            : null,
           deadline: item.validThrough ? String(item.validThrough).slice(0, 10) : null,
-          skills: typeof item.skills === "string" ? item.skills.split(/[,;]\s*/).filter(Boolean) : [],
+          skills:
+            typeof item.skills === "string" ? item.skills.split(/[,;]\s*/).filter(Boolean) : [],
         };
       }
     } catch {
@@ -54,11 +57,54 @@ function extractJsonLd(): Partial<JobPayload> {
 }
 
 const SKILL_HINTS = [
-  "javascript", "typescript", "react", "next.js", "node", "node.js", "python", "django", "flask",
-  "java", "spring", "kotlin", "swift", "go", "rust", "c++", "c#", ".net", "ruby", "rails", "php",
-  "laravel", "sql", "postgresql", "mysql", "mongodb", "redis", "kafka", "aws", "gcp", "azure",
-  "docker", "kubernetes", "terraform", "graphql", "rest", "figma", "product management", "agile",
-  "scrum", "machine learning", "pytorch", "tensorflow", "nlp", "llm", "excel", "tableau", "power bi",
+  "javascript",
+  "typescript",
+  "react",
+  "next.js",
+  "node",
+  "node.js",
+  "python",
+  "django",
+  "flask",
+  "java",
+  "spring",
+  "kotlin",
+  "swift",
+  "go",
+  "rust",
+  "c++",
+  "c#",
+  ".net",
+  "ruby",
+  "rails",
+  "php",
+  "laravel",
+  "sql",
+  "postgresql",
+  "mysql",
+  "mongodb",
+  "redis",
+  "kafka",
+  "aws",
+  "gcp",
+  "azure",
+  "docker",
+  "kubernetes",
+  "terraform",
+  "graphql",
+  "rest",
+  "figma",
+  "product management",
+  "agile",
+  "scrum",
+  "machine learning",
+  "pytorch",
+  "tensorflow",
+  "nlp",
+  "llm",
+  "excel",
+  "tableau",
+  "power bi",
 ];
 
 function inferSkills(text: string, seed: string[] = []): string[] {
@@ -85,10 +131,18 @@ function detectSource(host: string): string {
 function siteFallback(host: string): Partial<JobPayload> {
   if (host.includes("linkedin")) {
     return {
-      role: textFrom(".job-details-jobs-unified-top-card__job-title, .jobs-unified-top-card__job-title, h1"),
-      company: textFrom(".job-details-jobs-unified-top-card__company-name a, .jobs-unified-top-card__company-name, .topcard__org-name-link"),
-      location: textFrom(".job-details-jobs-unified-top-card__primary-description-container span, .jobs-unified-top-card__bullet"),
-      description: clean(textFrom("#job-details, .jobs-description__content, .show-more-less-html__markup")),
+      role: textFrom(
+        ".job-details-jobs-unified-top-card__job-title, .jobs-unified-top-card__job-title, h1",
+      ),
+      company: textFrom(
+        ".job-details-jobs-unified-top-card__company-name a, .jobs-unified-top-card__company-name, .topcard__org-name-link",
+      ),
+      location: textFrom(
+        ".job-details-jobs-unified-top-card__primary-description-container span, .jobs-unified-top-card__bullet",
+      ),
+      description: clean(
+        textFrom("#job-details, .jobs-description__content, .show-more-less-html__markup"),
+      ),
     };
   }
   if (host.includes("wellfound")) {
@@ -115,15 +169,23 @@ function siteFallback(host: string): Partial<JobPayload> {
       company: textFrom(".styles_jd-header-comp-name__MvqAI a, .jd-header-comp-name a"),
       location: textFrom(".styles_jhc__loc___Du2H, .location"),
       salary: textFrom(".styles_jhc__salary__jdfEC, .salary"),
-      description: clean(textFrom(".styles_JDC__dang-inner-html__h0K4t, .job-desc, .dang-inner-html")),
+      description: clean(
+        textFrom(".styles_JDC__dang-inner-html__h0K4t, .job-desc, .dang-inner-html"),
+      ),
     };
   }
   if (host.includes("indeed")) {
     return {
-      role: textFrom('h1[data-testid="jobsearch-JobInfoHeader-title"], h1.jobsearch-JobInfoHeader-title'),
+      role: textFrom(
+        'h1[data-testid="jobsearch-JobInfoHeader-title"], h1.jobsearch-JobInfoHeader-title',
+      ),
       company: textFrom('[data-testid="inlineHeader-companyName"] a, [data-company-name="true"]'),
-      location: textFrom('[data-testid="inlineHeader-companyLocation"], [data-testid="jobsearch-JobInfoHeader-companyLocation"]'),
-      salary: textFrom('[id*="salaryInfoAndJobType"] span, [data-testid="attribute_snippet_testid"]'),
+      location: textFrom(
+        '[data-testid="inlineHeader-companyLocation"], [data-testid="jobsearch-JobInfoHeader-companyLocation"]',
+      ),
+      salary: textFrom(
+        '[id*="salaryInfoAndJobType"] span, [data-testid="attribute_snippet_testid"]',
+      ),
       description: clean(textFrom("#jobDescriptionText")),
     };
   }
@@ -147,9 +209,15 @@ function siteFallback(host: string): Partial<JobPayload> {
   if (host.includes("lever")) {
     return {
       role: textFrom(".posting-headline h2, h2"),
-      company: textFrom(".main-header-logo img") ? document.title.split("-")[0].trim() : textFrom(".main-header .company-name"),
+      company: textFrom(".main-header-logo img")
+        ? document.title.split("-")[0].trim()
+        : textFrom(".main-header .company-name"),
       location: textFrom(".posting-categories .location, .sort-by-time"),
-      description: clean(textFrom(".content .section-wrapper, .posting-page .content, .section-wrapper.page-full-width")),
+      description: clean(
+        textFrom(
+          ".content .section-wrapper, .posting-page .content, .section-wrapper.page-full-width",
+        ),
+      ),
     };
   }
   if (host.includes("ashby")) {
@@ -182,6 +250,9 @@ export function extractJob(): JobPayload {
     skills: [],
   };
 
-  merged.skills = inferSkills(`${merged.role ?? ""}\n${merged.description ?? ""}`, jsonLd.skills ?? []);
+  merged.skills = inferSkills(
+    `${merged.role ?? ""}\n${merged.description ?? ""}`,
+    jsonLd.skills ?? [],
+  );
   return merged;
 }

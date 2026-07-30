@@ -26,7 +26,10 @@ export async function refreshSession(session: Session): Promise<Session | null> 
   };
 }
 
-async function withAuth<T>(session: Session, fn: (s: Session) => Promise<Response>): Promise<{ data: T; session: Session }> {
+async function withAuth<T>(
+  session: Session,
+  fn: (s: Session) => Promise<Response>,
+): Promise<{ data: T; session: Session }> {
   let s = session;
   if (s.expires_at && s.expires_at * 1000 < Date.now() + 60_000) {
     const refreshed = await refreshSession(s);
@@ -52,7 +55,9 @@ export async function findDuplicate(session: Session, job: JobPayload) {
   const filters: string[] = [];
   if (job.apply_url) filters.push(`job_url.eq.${encodeURIComponent(job.apply_url)}`);
   const nameFilter =
-    job.company && job.role ? `and(company.ilike.${encodeURIComponent(job.company)},role.ilike.${encodeURIComponent(job.role)})` : null;
+    job.company && job.role
+      ? `and(company.ilike.${encodeURIComponent(job.company)},role.ilike.${encodeURIComponent(job.role)})`
+      : null;
   if (nameFilter) filters.push(nameFilter);
   if (!filters.length) return { data: [] as { id: string }[], session };
   const or = filters.join(",");
@@ -82,14 +87,24 @@ export async function insertApplication(session: Session, job: JobPayload) {
   ];
   const url = `${SUPABASE_URL}/rest/v1/applications`;
   return withAuth<{ id: string; company: string; role: string }[]>(session, (s) =>
-    fetch(url, { method: "POST", headers: { ...headers(s), Prefer: "return=representation" }, body: JSON.stringify(body) }),
+    fetch(url, {
+      method: "POST",
+      headers: { ...headers(s), Prefer: "return=representation" },
+      body: JSON.stringify(body),
+    }),
   );
 }
 
 export async function recentApplications(session: Session) {
   const url = `${SUPABASE_URL}/rest/v1/applications?select=id,company,role,job_url,status,created_at&deleted_at=is.null&order=created_at.desc&limit=6`;
-  return withAuth<{ id: string; company: string; role: string; job_url: string | null; status: string; created_at: string }[]>(
-    session,
-    (s) => fetch(url, { headers: headers(s) }),
-  );
+  return withAuth<
+    {
+      id: string;
+      company: string;
+      role: string;
+      job_url: string | null;
+      status: string;
+      created_at: string;
+    }[]
+  >(session, (s) => fetch(url, { headers: headers(s) }));
 }

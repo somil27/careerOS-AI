@@ -28,12 +28,12 @@ export const analyzeResume = createServerFn({ method: "POST" })
 
 ### Domains
 
-| Module | Selected functions |
-| --- | --- |
-| `features/ai` | `analyzeResume`, `compareResumes`, `matchJob`, `generateCoverLetter`, `interviewPrep`, `generateStarAnswer`, `scoreInterviewAnswer`, `careerCoach` |
-| `features/career` | Weekly + monthly roadmap generation, goal + skill CRUD, progress dashboard queries |
-| `features/mock-interview` | `startSession`, `nextQuestion`, `submitAnswer`, `finalizeSession`, `getReport`, history & trends |
-| `features/resumes` | `getSharedResume`, active resume queries, share-link management |
+| Module                    | Selected functions                                                                                                                                 |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `features/ai`             | `analyzeResume`, `compareResumes`, `matchJob`, `generateCoverLetter`, `interviewPrep`, `generateStarAnswer`, `scoreInterviewAnswer`, `careerCoach` |
+| `features/career`         | Weekly + monthly roadmap generation, goal + skill CRUD, progress dashboard queries                                                                 |
+| `features/mock-interview` | `startSession`, `nextQuestion`, `submitAnswer`, `finalizeSession`, `getReport`, history & trends                                                   |
+| `features/resumes`        | `getSharedResume`, active resume queries, share-link management                                                                                    |
 
 ### Calling Pattern
 
@@ -91,8 +91,20 @@ the RPC surface.
 ```graphql
 query MyApplications($first: Int!, $after: Cursor) {
   applications(first: $first, after: $after, orderBy: CREATED_AT_DESC) {
-    edges { cursor node { id company role status createdAt } }
-    pageInfo { hasNextPage endCursor }
+    edges {
+      cursor
+      node {
+        id
+        company
+        role
+        status
+        createdAt
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
   }
 }
 ```

@@ -31,7 +31,9 @@ export function EmptyState({
       </div>
       <h3 className="text-base font-semibold tracking-tight">{title}</h3>
       {description ? (
-        <p className="mt-1.5 text-sm text-muted-foreground max-w-sm leading-relaxed">{description}</p>
+        <p className="mt-1.5 text-sm text-muted-foreground max-w-sm leading-relaxed">
+          {description}
+        </p>
       ) : null}
       {action ? <div className="mt-5">{action}</div> : null}
     </motion.div>
@@ -71,7 +73,9 @@ export function ErrorState({
       </div>
       <h3 className="text-base font-semibold tracking-tight">{title}</h3>
       {description ? (
-        <p className="mt-1.5 text-sm text-muted-foreground max-w-sm leading-relaxed">{description}</p>
+        <p className="mt-1.5 text-sm text-muted-foreground max-w-sm leading-relaxed">
+          {description}
+        </p>
       ) : null}
       {onRetry ? (
         <Button variant="outline" size="sm" className="mt-5" onClick={onRetry}>
@@ -93,7 +97,10 @@ export function Skeleton({ className = "" }: { className?: string }) {
 
 export function SkeletonCard({ className = "" }: { className?: string }) {
   return (
-    <div className={`rounded-xl border border-border bg-card p-5 space-y-3 ${className}`} aria-hidden>
+    <div
+      className={`rounded-xl border border-border bg-card p-5 space-y-3 ${className}`}
+      aria-hidden
+    >
       <Skeleton className="h-4 w-1/3" />
       <Skeleton className="h-3 w-2/3" />
       <Skeleton className="h-3 w-1/2" />

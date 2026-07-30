@@ -8,20 +8,50 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
-  Upload, FileText, Download, Trash2, Star, Loader2, MoreHorizontal, Eye, Share2, History,
-  GitCompare, BarChart3, Archive, Copy, Link as LinkIcon, RotateCcw, Layers, Tag,
+  Upload,
+  FileText,
+  Download,
+  Trash2,
+  Star,
+  Loader2,
+  MoreHorizontal,
+  Eye,
+  Share2,
+  History,
+  GitCompare,
+  BarChart3,
+  Archive,
+  Copy,
+  Link as LinkIcon,
+  RotateCcw,
+  Layers,
+  Tag,
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -67,7 +97,11 @@ function slugify() {
 
 async function readFileText(file: File): Promise<string> {
   if (file.type === "text/plain" || file.name.endsWith(".txt")) {
-    try { return await file.text(); } catch { return ""; }
+    try {
+      return await file.text();
+    } catch {
+      return "";
+    }
   }
   return "";
 }
@@ -77,7 +111,13 @@ function Resumes() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [uploadForm, setUploadForm] = useState({ name: "", template: "classic", tags: "", notes: "", parentId: "" });
+  const [uploadForm, setUploadForm] = useState({
+    name: "",
+    template: "classic",
+    tags: "",
+    notes: "",
+    parentId: "",
+  });
   const [tab, setTab] = useState<"active" | "trash">("active");
   const [tagFilter, setTagFilter] = useState<string>("");
   const [templateFilter, setTemplateFilter] = useState<string>("all");
@@ -96,7 +136,10 @@ function Resumes() {
   const { data: resumes = [], isLoading } = useQuery<Resume[]>({
     queryKey: ["resumes-all"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("resumes").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("resumes")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as Resume[];
     },
@@ -108,7 +151,12 @@ function Resumes() {
     return list.filter((r) => {
       if (tagFilter && !(r.tags ?? []).includes(tagFilter)) return false;
       if (templateFilter !== "all" && r.template !== templateFilter) return false;
-      if (q && !r.name.toLowerCase().includes(q) && !(r.extracted_text ?? "").toLowerCase().includes(q)) return false;
+      if (
+        q &&
+        !r.name.toLowerCase().includes(q) &&
+        !(r.extracted_text ?? "").toLowerCase().includes(q)
+      )
+        return false;
       return true;
     });
   }, [resumes, tab, tagFilter, templateFilter, search]);
@@ -125,7 +173,9 @@ function Resumes() {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Not signed in");
       const path = `${u.user.id}/${Date.now()}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from("resumes").upload(path, file, { upsert: false, contentType: file.type });
+      const { error: upErr } = await supabase.storage
+        .from("resumes")
+        .upload(path, file, { upsert: false, contentType: file.type });
       if (upErr) throw upErr;
 
       const extractedText = await readFileText(file);
@@ -135,10 +185,16 @@ function Resumes() {
       let parent_id: string | null = null;
       if (uploadForm.parentId) {
         const parent = resumes.find((r) => r.id === uploadForm.parentId);
-        if (parent) { version = parent.version + 1; parent_id = parent.id; }
+        if (parent) {
+          version = parent.version + 1;
+          parent_id = parent.id;
+        }
       }
 
-      const tags = uploadForm.tags.split(",").map((t) => t.trim()).filter(Boolean);
+      const tags = uploadForm.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
       const activeCount = resumes.filter((r) => r.is_active && !r.deleted_at).length;
 
       const { error } = await supabase.from("resumes").insert({
@@ -161,8 +217,11 @@ function Resumes() {
       setUploadForm({ name: "", template: "classic", tags: "", notes: "", parentId: "" });
       qc.invalidateQueries({ queryKey: ["resumes-all"] });
       qc.invalidateQueries({ queryKey: ["active-resume-text"] });
-    } catch (e: any) { toast.error(e.message); }
-    finally { setUploading(false); }
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUploading(false);
+    }
   }
 
   const setActive = useMutation({
@@ -183,7 +242,10 @@ function Resumes() {
 
   const softDelete = useMutation({
     mutationFn: async (r: Resume) => {
-      const { error } = await supabase.from("resumes").update({ deleted_at: new Date().toISOString(), is_active: false } as any).eq("id", r.id);
+      const { error } = await supabase
+        .from("resumes")
+        .update({ deleted_at: new Date().toISOString(), is_active: false } as any)
+        .eq("id", r.id);
       if (error) throw error;
       return r;
     },
@@ -193,7 +255,10 @@ function Resumes() {
         action: {
           label: "Undo",
           onClick: async () => {
-            await supabase.from("resumes").update({ deleted_at: null } as any).eq("id", r.id);
+            await supabase
+              .from("resumes")
+              .update({ deleted_at: null } as any)
+              .eq("id", r.id);
             qc.invalidateQueries({ queryKey: ["resumes-all"] });
           },
         },
@@ -204,10 +269,16 @@ function Resumes() {
 
   const restore = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("resumes").update({ deleted_at: null } as any).eq("id", id);
+      const { error } = await supabase
+        .from("resumes")
+        .update({ deleted_at: null } as any)
+        .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["resumes-all"] }); toast.success("Restored"); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["resumes-all"] });
+      toast.success("Restored");
+    },
   });
 
   const hardDelete = useMutation({
@@ -216,25 +287,36 @@ function Resumes() {
       const { error } = await supabase.from("resumes").delete().eq("id", r.id);
       if (error) throw error;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["resumes-all"] }); toast.success("Permanently deleted"); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["resumes-all"] });
+      toast.success("Permanently deleted");
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
   async function download(r: Resume) {
     const { data, error } = await supabase.storage.from("resumes").createSignedUrl(r.file_path, 60);
     if (error) return toast.error(error.message);
-    const a = document.createElement("a"); a.href = data.signedUrl; a.download = r.name; a.click();
+    const a = document.createElement("a");
+    a.href = data.signedUrl;
+    a.download = r.name;
+    a.click();
     // log
     const { data: u } = await supabase.auth.getUser();
     if (u.user) {
       await supabase.from("resume_downloads").insert({
-        resume_id: r.id, user_id: u.user.id, source: "app",
+        resume_id: r.id,
+        user_id: u.user.id,
+        source: "app",
         user_agent: navigator.userAgent,
       } as any);
-      await supabase.from("resumes").update({
-        download_count: (r.download_count ?? 0) + 1,
-        last_downloaded_at: new Date().toISOString(),
-      } as any).eq("id", r.id);
+      await supabase
+        .from("resumes")
+        .update({
+          download_count: (r.download_count ?? 0) + 1,
+          last_downloaded_at: new Date().toISOString(),
+        } as any)
+        .eq("id", r.id);
       qc.invalidateQueries({ queryKey: ["resumes-all"] });
     }
   }
@@ -242,7 +324,9 @@ function Resumes() {
   async function openPreview(r: Resume) {
     setPreviewOpen(r);
     setPreviewUrl(null);
-    const { data, error } = await supabase.storage.from("resumes").createSignedUrl(r.file_path, 60 * 10);
+    const { data, error } = await supabase.storage
+      .from("resumes")
+      .createSignedUrl(r.file_path, 60 * 10);
     if (error) return toast.error(error.message);
     setPreviewUrl(data.signedUrl);
   }
@@ -256,10 +340,14 @@ function Resumes() {
       supabase.from("resume_downloads").select("*"),
     ]);
     // include signed URLs (10 minutes) for portable download
-    const withUrls = await Promise.all((rs ?? []).map(async (r: any) => {
-      const { data } = await supabase.storage.from("resumes").createSignedUrl(r.file_path, 60 * 10);
-      return { ...r, signed_url: data?.signedUrl ?? null };
-    }));
+    const withUrls = await Promise.all(
+      (rs ?? []).map(async (r: any) => {
+        const { data } = await supabase.storage
+          .from("resumes")
+          .createSignedUrl(r.file_path, 60 * 10);
+        return { ...r, signed_url: data?.signedUrl ?? null };
+      }),
+    );
     const payload = {
       exported_at: new Date().toISOString(),
       user_id: u.user.id,
@@ -270,7 +358,9 @@ function Resumes() {
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `careeros-resumes-backup-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+    a.href = url;
+    a.download = `careeros-resumes-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
     URL.revokeObjectURL(url);
     toast.success("Backup downloaded");
   }
@@ -282,7 +372,13 @@ function Resumes() {
         description="Manage your resume library, versions, templates, share links, and analytics."
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => { setCompareOpen(true); }}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setCompareOpen(true);
+              }}
+            >
               <GitCompare className="size-4" /> Compare
             </Button>
             <Button variant="outline" size="sm" onClick={backup}>
@@ -290,55 +386,108 @@ function Resumes() {
             </Button>
             <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
               <DialogTrigger asChild>
-                <Button size="sm"><Upload className="size-4" /> Upload</Button>
+                <Button size="sm">
+                  <Upload className="size-4" /> Upload
+                </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Upload resume</DialogTitle>
-                  <DialogDescription>Add a new resume or a new version of an existing one.</DialogDescription>
+                  <DialogDescription>
+                    Add a new resume or a new version of an existing one.
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-3">
                   <div>
                     <Label htmlFor="name">Name</Label>
-                    <Input id="name" value={uploadForm.name} onChange={(e) => setUploadForm((f) => ({ ...f, name: e.target.value }))} placeholder="Friendly name (defaults to filename)" />
+                    <Input
+                      id="name"
+                      value={uploadForm.name}
+                      onChange={(e) => setUploadForm((f) => ({ ...f, name: e.target.value }))}
+                      placeholder="Friendly name (defaults to filename)"
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <Label>Template</Label>
-                      <Select value={uploadForm.template} onValueChange={(v) => setUploadForm((f) => ({ ...f, template: v }))}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                      <Select
+                        value={uploadForm.template}
+                        onValueChange={(v) => setUploadForm((f) => ({ ...f, template: v }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
                         <SelectContent>
-                          {TEMPLATES.map((t) => <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>)}
+                          {TEMPLATES.map((t) => (
+                            <SelectItem key={t.id} value={t.id}>
+                              {t.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
                       <Label>New version of</Label>
-                      <Select value={uploadForm.parentId || "none"} onValueChange={(v) => setUploadForm((f) => ({ ...f, parentId: v === "none" ? "" : v }))}>
-                        <SelectTrigger><SelectValue placeholder="Independent" /></SelectTrigger>
+                      <Select
+                        value={uploadForm.parentId || "none"}
+                        onValueChange={(v) =>
+                          setUploadForm((f) => ({ ...f, parentId: v === "none" ? "" : v }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Independent" />
+                        </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">Independent</SelectItem>
-                          {resumes.filter((r) => !r.deleted_at).map((r) => (
-                            <SelectItem key={r.id} value={r.id}>{r.name} (v{r.version})</SelectItem>
-                          ))}
+                          {resumes
+                            .filter((r) => !r.deleted_at)
+                            .map((r) => (
+                              <SelectItem key={r.id} value={r.id}>
+                                {r.name} (v{r.version})
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                   <div>
                     <Label htmlFor="tags">Tags (comma separated)</Label>
-                    <Input id="tags" value={uploadForm.tags} onChange={(e) => setUploadForm((f) => ({ ...f, tags: e.target.value }))} placeholder="senior, backend, remote" />
+                    <Input
+                      id="tags"
+                      value={uploadForm.tags}
+                      onChange={(e) => setUploadForm((f) => ({ ...f, tags: e.target.value }))}
+                      placeholder="senior, backend, remote"
+                    />
                   </div>
                   <div>
                     <Label htmlFor="notes">Notes</Label>
-                    <Textarea id="notes" rows={2} value={uploadForm.notes} onChange={(e) => setUploadForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Optional context for this version" />
+                    <Textarea
+                      id="notes"
+                      rows={2}
+                      value={uploadForm.notes}
+                      onChange={(e) => setUploadForm((f) => ({ ...f, notes: e.target.value }))}
+                      placeholder="Optional context for this version"
+                    />
                   </div>
-                  <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.txt" hidden onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt"
+                    hidden
+                    onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
+                  />
                 </div>
                 <DialogFooter>
-                  <Button variant="ghost" onClick={() => setUploadOpen(false)}>Cancel</Button>
+                  <Button variant="ghost" onClick={() => setUploadOpen(false)}>
+                    Cancel
+                  </Button>
                   <Button onClick={() => fileRef.current?.click()} disabled={uploading}>
-                    {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />} Choose file & upload
+                    {uploading ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Upload className="size-4" />
+                    )}{" "}
+                    Choose file & upload
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -349,26 +498,52 @@ function Resumes() {
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="mb-4">
         <TabsList>
-          <TabsTrigger value="active">Library ({resumes.filter((r) => !r.deleted_at).length})</TabsTrigger>
-          <TabsTrigger value="trash">Trash ({resumes.filter((r) => r.deleted_at).length})</TabsTrigger>
+          <TabsTrigger value="active">
+            Library ({resumes.filter((r) => !r.deleted_at).length})
+          </TabsTrigger>
+          <TabsTrigger value="trash">
+            Trash ({resumes.filter((r) => r.deleted_at).length})
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
-        <Input placeholder="Search by name or content…" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
+        <Input
+          placeholder="Search by name or content…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-xs"
+        />
         <Select value={templateFilter} onValueChange={setTemplateFilter}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="Template" /></SelectTrigger>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Template" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All templates</SelectItem>
-            {TEMPLATES.map((t) => <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>)}
+            {TEMPLATES.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         {allTags.length > 0 && (
           <div className="flex flex-wrap gap-1 items-center">
             <Tag className="size-3.5 text-muted-foreground" />
-            <button className={`text-xs px-2 py-0.5 rounded-full border ${tagFilter === "" ? "bg-primary text-primary-foreground" : "bg-background"}`} onClick={() => setTagFilter("")}>All</button>
+            <button
+              className={`text-xs px-2 py-0.5 rounded-full border ${tagFilter === "" ? "bg-primary text-primary-foreground" : "bg-background"}`}
+              onClick={() => setTagFilter("")}
+            >
+              All
+            </button>
             {allTags.map((t) => (
-              <button key={t} className={`text-xs px-2 py-0.5 rounded-full border ${tagFilter === t ? "bg-primary text-primary-foreground" : "bg-background"}`} onClick={() => setTagFilter(t)}>{t}</button>
+              <button
+                key={t}
+                className={`text-xs px-2 py-0.5 rounded-full border ${tagFilter === t ? "bg-primary text-primary-foreground" : "bg-background"}`}
+                onClick={() => setTagFilter(t)}
+              >
+                {t}
+              </button>
             ))}
           </div>
         )}
@@ -380,8 +555,18 @@ function Resumes() {
         <EmptyState
           icon={FileText}
           title={tab === "trash" ? "Trash is empty" : "No resumes yet"}
-          description={tab === "trash" ? "Deleted resumes appear here for restore." : "Upload your first resume to unlock AI features."}
-          action={tab === "active" ? <Button onClick={() => setUploadOpen(true)}><Upload className="size-4" /> Upload</Button> : null}
+          description={
+            tab === "trash"
+              ? "Deleted resumes appear here for restore."
+              : "Upload your first resume to unlock AI features."
+          }
+          action={
+            tab === "active" ? (
+              <Button onClick={() => setUploadOpen(true)}>
+                <Upload className="size-4" /> Upload
+              </Button>
+            ) : null
+          }
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -390,11 +575,14 @@ function Resumes() {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2 gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="size-9 rounded-md bg-accent text-primary grid place-items-center shrink-0"><FileText className="size-4" /></div>
+                    <div className="size-9 rounded-md bg-accent text-primary grid place-items-center shrink-0">
+                      <FileText className="size-4" />
+                    </div>
                     <div className="min-w-0">
                       <div className="font-medium text-sm truncate">{r.name}</div>
                       <div className="text-xs text-muted-foreground truncate">
-                        {formatDate(r.created_at)} · v{r.version} · {TEMPLATES.find((t) => t.id === r.template)?.label ?? r.template}
+                        {formatDate(r.created_at)} · v{r.version} ·{" "}
+                        {TEMPLATES.find((t) => t.id === r.template)?.label ?? r.template}
                       </div>
                     </div>
                   </div>
@@ -406,44 +594,113 @@ function Resumes() {
                 </div>
                 {r.tags?.length ? (
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {r.tags.map((t) => <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>)}
+                    {r.tags.map((t) => (
+                      <Badge key={t} variant="secondary" className="text-[10px]">
+                        {t}
+                      </Badge>
+                    ))}
                   </div>
                 ) : null}
                 <div className="text-xs text-muted-foreground flex items-center gap-3 mb-3">
-                  <span className="inline-flex items-center gap-1"><Download className="size-3" /> {r.download_count ?? 0}</span>
-                  {r.parent_id ? <span className="inline-flex items-center gap-1"><Layers className="size-3" /> version</span> : null}
+                  <span className="inline-flex items-center gap-1">
+                    <Download className="size-3" /> {r.download_count ?? 0}
+                  </span>
+                  {r.parent_id ? (
+                    <span className="inline-flex items-center gap-1">
+                      <Layers className="size-3" /> version
+                    </span>
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-1 justify-between">
                   <div className="flex items-center gap-1">
                     {r.deleted_at ? (
                       <>
-                        <Button size="sm" variant="outline" onClick={() => restore.mutate(r.id)}><RotateCcw className="size-4" /> Restore</Button>
-                        <Button size="sm" variant="ghost" onClick={() => { if (confirm("Delete permanently?")) hardDelete.mutate(r); }}><Trash2 className="size-4" /></Button>
+                        <Button size="sm" variant="outline" onClick={() => restore.mutate(r.id)}>
+                          <RotateCcw className="size-4" /> Restore
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            if (confirm("Delete permanently?")) hardDelete.mutate(r);
+                          }}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
                       </>
                     ) : (
                       <>
-                        {!r.is_active && <Button size="sm" variant="outline" onClick={() => setActive.mutate(r.id)}>Make active</Button>}
-                        <Button size="sm" variant="ghost" onClick={() => openPreview(r)} aria-label="Preview"><Eye className="size-4" /></Button>
-                        <Button size="sm" variant="ghost" onClick={() => download(r)} aria-label="Download"><Download className="size-4" /></Button>
+                        {!r.is_active && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setActive.mutate(r.id)}
+                          >
+                            Make active
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openPreview(r)}
+                          aria-label="Preview"
+                        >
+                          <Eye className="size-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => download(r)}
+                          aria-label="Download"
+                        >
+                          <Download className="size-4" />
+                        </Button>
                       </>
                     )}
                   </div>
                   {!r.deleted_at && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button size="icon" variant="ghost" aria-label="More"><MoreHorizontal className="size-4" /></Button>
+                        <Button size="icon" variant="ghost" aria-label="More">
+                          <MoreHorizontal className="size-4" />
+                        </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setShareFor(r)}><Share2 className="size-4 mr-2" /> Share link</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setHistoryFor(r)}><History className="size-4 mr-2" /> Version history</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setAnalyticsFor(r)}><BarChart3 className="size-4 mr-2" /> Analytics</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setDownloadsFor(r)}><Download className="size-4 mr-2" /> Download history</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { setCompareA(r.id); setCompareOpen(true); }}><GitCompare className="size-4 mr-2" /> Compare</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { setUploadForm((f) => ({ ...f, parentId: r.id, name: r.name })); setUploadOpen(true); }}>
+                        <DropdownMenuItem onClick={() => setShareFor(r)}>
+                          <Share2 className="size-4 mr-2" /> Share link
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setHistoryFor(r)}>
+                          <History className="size-4 mr-2" /> Version history
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setAnalyticsFor(r)}>
+                          <BarChart3 className="size-4 mr-2" /> Analytics
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setDownloadsFor(r)}>
+                          <Download className="size-4 mr-2" /> Download history
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setCompareA(r.id);
+                            setCompareOpen(true);
+                          }}
+                        >
+                          <GitCompare className="size-4 mr-2" /> Compare
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setUploadForm((f) => ({ ...f, parentId: r.id, name: r.name }));
+                            setUploadOpen(true);
+                          }}
+                        >
                           <Upload className="size-4 mr-2" /> New version
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => softDelete.mutate(r)} className="text-destructive"><Trash2 className="size-4 mr-2" /> Move to trash</DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => softDelete.mutate(r)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="size-4 mr-2" /> Move to trash
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
@@ -455,7 +712,15 @@ function Resumes() {
       )}
 
       {/* PDF Preview */}
-      <Dialog open={!!previewOpen} onOpenChange={(o) => { if (!o) { setPreviewOpen(null); setPreviewUrl(null); } }}>
+      <Dialog
+        open={!!previewOpen}
+        onOpenChange={(o) => {
+          if (!o) {
+            setPreviewOpen(null);
+            setPreviewUrl(null);
+          }
+        }}
+      >
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>{previewOpen?.name}</DialogTitle>
@@ -463,27 +728,49 @@ function Resumes() {
           </DialogHeader>
           {previewUrl ? (
             previewOpen?.file_path.toLowerCase().endsWith(".pdf") ? (
-              <iframe title="Resume preview" src={previewUrl} className="w-full h-[70vh] rounded-md border" />
+              <iframe
+                title="Resume preview"
+                src={previewUrl}
+                className="w-full h-[70vh] rounded-md border"
+              />
             ) : (
               <div className="p-4 max-h-[70vh] overflow-auto whitespace-pre-wrap text-sm">
                 {previewOpen?.extracted_text || (
-                  <a href={previewUrl} target="_blank" rel="noreferrer" className="text-primary underline">Open file</a>
+                  <a
+                    href={previewUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary underline"
+                  >
+                    Open file
+                  </a>
                 )}
               </div>
             )
-          ) : <LoadingState />}
+          ) : (
+            <LoadingState />
+          )}
         </DialogContent>
       </Dialog>
 
       {/* Version history */}
-      <VersionHistoryDialog resume={historyFor} resumes={resumes} onClose={() => setHistoryFor(null)} onPreview={openPreview} onMakeActive={(id) => setActive.mutate(id)} />
+      <VersionHistoryDialog
+        resume={historyFor}
+        resumes={resumes}
+        onClose={() => setHistoryFor(null)}
+        onPreview={openPreview}
+        onMakeActive={(id) => setActive.mutate(id)}
+      />
 
       {/* Compare */}
       <CompareDialog
         open={compareOpen}
         onOpenChange={setCompareOpen}
         resumes={resumes.filter((r) => !r.deleted_at)}
-        a={compareA} b={compareB} setA={setCompareA} setB={setCompareB}
+        a={compareA}
+        b={compareB}
+        setA={setCompareA}
+        setB={setCompareB}
       />
 
       {/* Share */}
@@ -499,22 +786,37 @@ function Resumes() {
 }
 
 function VersionHistoryDialog({
-  resume, resumes, onClose, onPreview, onMakeActive,
+  resume,
+  resumes,
+  onClose,
+  onPreview,
+  onMakeActive,
 }: {
-  resume: Resume | null; resumes: Resume[]; onClose: () => void; onPreview: (r: Resume) => void; onMakeActive: (id: string) => void;
+  resume: Resume | null;
+  resumes: Resume[];
+  onClose: () => void;
+  onPreview: (r: Resume) => void;
+  onMakeActive: (id: string) => void;
 }) {
   if (!resume) return null;
   // Build lineage: walk up parent_id, and gather all descendants
   const byId = new Map(resumes.map((r) => [r.id, r]));
-  const root = (() => { let cur = resume; while (cur.parent_id && byId.get(cur.parent_id)) cur = byId.get(cur.parent_id)!; return cur; })();
+  const root = (() => {
+    let cur = resume;
+    while (cur.parent_id && byId.get(cur.parent_id)) cur = byId.get(cur.parent_id)!;
+    return cur;
+  })();
   const lineage: Resume[] = [];
   const walk = (id: string) => {
-    const node = byId.get(id); if (!node) return;
+    const node = byId.get(id);
+    if (!node) return;
     lineage.push(node);
     resumes.filter((r) => r.parent_id === id).forEach((c) => walk(c.id));
   };
   walk(root.id);
-  lineage.sort((a, b) => a.version - b.version || +new Date(a.created_at) - +new Date(b.created_at));
+  lineage.sort(
+    (a, b) => a.version - b.version || +new Date(a.created_at) - +new Date(b.created_at),
+  );
 
   return (
     <Dialog open={!!resume} onOpenChange={(o) => !o && onClose()}>
@@ -529,14 +831,29 @@ function VersionHistoryDialog({
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate flex items-center gap-2">
                   v{r.version} · {r.name}
-                  {r.is_active && <Badge variant="default" className="text-[10px]">Active</Badge>}
+                  {r.is_active && (
+                    <Badge variant="default" className="text-[10px]">
+                      Active
+                    </Badge>
+                  )}
                 </div>
-                <div className="text-xs text-muted-foreground">{formatDate(r.created_at)} · {TEMPLATES.find((t) => t.id === r.template)?.label ?? r.template}</div>
-                {r.notes && <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{r.notes}</div>}
+                <div className="text-xs text-muted-foreground">
+                  {formatDate(r.created_at)} ·{" "}
+                  {TEMPLATES.find((t) => t.id === r.template)?.label ?? r.template}
+                </div>
+                {r.notes && (
+                  <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{r.notes}</div>
+                )}
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <Button size="sm" variant="ghost" onClick={() => onPreview(r)}><Eye className="size-4" /></Button>
-                {!r.is_active && <Button size="sm" variant="outline" onClick={() => onMakeActive(r.id)}>Activate</Button>}
+                <Button size="sm" variant="ghost" onClick={() => onPreview(r)}>
+                  <Eye className="size-4" />
+                </Button>
+                {!r.is_active && (
+                  <Button size="sm" variant="outline" onClick={() => onMakeActive(r.id)}>
+                    Activate
+                  </Button>
+                )}
               </div>
             </li>
           ))}
@@ -547,10 +864,21 @@ function VersionHistoryDialog({
 }
 
 function CompareDialog({
-  open, onOpenChange, resumes, a, b, setA, setB,
+  open,
+  onOpenChange,
+  resumes,
+  a,
+  b,
+  setA,
+  setB,
 }: {
-  open: boolean; onOpenChange: (o: boolean) => void; resumes: Resume[];
-  a: string; b: string; setA: (v: string) => void; setB: (v: string) => void;
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  resumes: Resume[];
+  a: string;
+  b: string;
+  setA: (v: string) => void;
+  setB: (v: string) => void;
 }) {
   const ra = resumes.find((r) => r.id === a);
   const rb = resumes.find((r) => r.id === b);
@@ -568,31 +896,67 @@ function CompareDialog({
         </DialogHeader>
         <div className="grid grid-cols-2 gap-3">
           <Select value={a} onValueChange={setA}>
-            <SelectTrigger><SelectValue placeholder="Select A" /></SelectTrigger>
-            <SelectContent>{resumes.map((r) => <SelectItem key={r.id} value={r.id}>{r.name} · v{r.version}</SelectItem>)}</SelectContent>
+            <SelectTrigger>
+              <SelectValue placeholder="Select A" />
+            </SelectTrigger>
+            <SelectContent>
+              {resumes.map((r) => (
+                <SelectItem key={r.id} value={r.id}>
+                  {r.name} · v{r.version}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
           <Select value={b} onValueChange={setB}>
-            <SelectTrigger><SelectValue placeholder="Select B" /></SelectTrigger>
-            <SelectContent>{resumes.map((r) => <SelectItem key={r.id} value={r.id}>{r.name} · v{r.version}</SelectItem>)}</SelectContent>
+            <SelectTrigger>
+              <SelectValue placeholder="Select B" />
+            </SelectTrigger>
+            <SelectContent>
+              {resumes.map((r) => (
+                <SelectItem key={r.id} value={r.id}>
+                  {r.name} · v{r.version}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
         {ra && rb ? (
           <div className="grid grid-cols-2 gap-3 max-h-[60vh] overflow-auto">
             <div className="text-xs font-mono border rounded-md p-3 space-y-0.5 bg-card">
-              <div className="font-sans text-sm font-semibold mb-2">{ra.name} · v{ra.version}</div>
+              <div className="font-sans text-sm font-semibold mb-2">
+                {ra.name} · v{ra.version}
+              </div>
               {linesA.map((l, i) => (
-                <div key={i} className={setB2.has(l.trim()) ? "" : "bg-destructive/10 text-destructive-foreground rounded px-1"}>{l || "\u00A0"}</div>
+                <div
+                  key={i}
+                  className={
+                    setB2.has(l.trim())
+                      ? ""
+                      : "bg-destructive/10 text-destructive-foreground rounded px-1"
+                  }
+                >
+                  {l || "\u00A0"}
+                </div>
               ))}
             </div>
             <div className="text-xs font-mono border rounded-md p-3 space-y-0.5 bg-card">
-              <div className="font-sans text-sm font-semibold mb-2">{rb.name} · v{rb.version}</div>
+              <div className="font-sans text-sm font-semibold mb-2">
+                {rb.name} · v{rb.version}
+              </div>
               {linesB.map((l, i) => (
-                <div key={i} className={setA2.has(l.trim()) ? "" : "bg-success/10 text-success rounded px-1"}>{l || "\u00A0"}</div>
+                <div
+                  key={i}
+                  className={setA2.has(l.trim()) ? "" : "bg-success/10 text-success rounded px-1"}
+                >
+                  {l || "\u00A0"}
+                </div>
               ))}
             </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">Choose two resumes to compare. Text-based content is compared line by line.</p>
+          <p className="text-sm text-muted-foreground">
+            Choose two resumes to compare. Text-based content is compared line by line.
+          </p>
         )}
       </DialogContent>
     </Dialog>
@@ -605,7 +969,11 @@ function ShareDialog({ resume, onClose }: { resume: Resume | null; onClose: () =
     queryKey: ["resume-shares", resume?.id],
     enabled: !!resume,
     queryFn: async () => {
-      const { data, error } = await supabase.from("resume_shares").select("*").eq("resume_id", resume!.id).order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("resume_shares")
+        .select("*")
+        .eq("resume_id", resume!.id)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -617,9 +985,16 @@ function ShareDialog({ resume, onClose }: { resume: Resume | null; onClose: () =
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return toast.error("Not signed in");
     const slug = slugify();
-    const expires_at = expiryDays === "never" ? null : new Date(Date.now() + parseInt(expiryDays, 10) * 86400_000).toISOString();
+    const expires_at =
+      expiryDays === "never"
+        ? null
+        : new Date(Date.now() + parseInt(expiryDays, 10) * 86400_000).toISOString();
     const { error } = await supabase.from("resume_shares").insert({
-      resume_id: resume.id, user_id: u.user.id, slug, expires_at, is_active: true,
+      resume_id: resume.id,
+      user_id: u.user.id,
+      slug,
+      expires_at,
+      is_active: true,
     } as any);
     if (error) return toast.error(error.message);
     toast.success("Share link created");
@@ -627,7 +1002,10 @@ function ShareDialog({ resume, onClose }: { resume: Resume | null; onClose: () =
     qc.invalidateQueries({ queryKey: ["resume-shares", resume.id] });
   }
   async function toggle(id: string, is_active: boolean) {
-    const { error } = await supabase.from("resume_shares").update({ is_active } as any).eq("id", id);
+    const { error } = await supabase
+      .from("resume_shares")
+      .update({ is_active } as any)
+      .eq("id", id);
     if (error) return toast.error(error.message);
     refetch();
   }
@@ -647,13 +1025,17 @@ function ShareDialog({ resume, onClose }: { resume: Resume | null; onClose: () =
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Share resume</DialogTitle>
-          <DialogDescription>Create private links that anyone with the URL can open.</DialogDescription>
+          <DialogDescription>
+            Create private links that anyone with the URL can open.
+          </DialogDescription>
         </DialogHeader>
         <div className="flex items-end gap-2">
           <div className="flex-1">
             <Label>Expiry</Label>
             <Select value={expiryDays} onValueChange={setExpiryDays}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="never">Never</SelectItem>
                 <SelectItem value="1">1 day</SelectItem>
@@ -663,10 +1045,14 @@ function ShareDialog({ resume, onClose }: { resume: Resume | null; onClose: () =
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={createLink}><LinkIcon className="size-4" /> Create link</Button>
+          <Button onClick={createLink}>
+            <LinkIcon className="size-4" /> Create link
+          </Button>
         </div>
         <div className="divide-y border rounded-md">
-          {shares.length === 0 && <div className="p-4 text-sm text-muted-foreground">No links yet.</div>}
+          {shares.length === 0 && (
+            <div className="p-4 text-sm text-muted-foreground">No links yet.</div>
+          )}
           {shares.map((s) => {
             const url = `${typeof window !== "undefined" ? window.location.origin : ""}/r/${s.slug}`;
             return (
@@ -674,13 +1060,33 @@ function ShareDialog({ resume, onClose }: { resume: Resume | null; onClose: () =
                 <div className="min-w-0">
                   <div className="text-sm font-mono truncate">{url}</div>
                   <div className="text-xs text-muted-foreground">
-                    {s.view_count ?? 0} views · {s.expires_at ? `expires ${formatDate(s.expires_at)}` : "no expiry"} · created {formatDate(s.created_at)}
+                    {s.view_count ?? 0} views ·{" "}
+                    {s.expires_at ? `expires ${formatDate(s.expires_at)}` : "no expiry"} · created{" "}
+                    {formatDate(s.created_at)}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Switch checked={s.is_active} onCheckedChange={(v) => toggle(s.id, v)} aria-label="Active" />
-                  <Button size="icon" variant="ghost" aria-label="Copy share link" onClick={() => copyUrl(s.slug)}><Copy className="size-4" /></Button>
-                  <Button size="icon" variant="ghost" aria-label="Delete share" onClick={() => remove(s.id)}><Trash2 className="size-4" /></Button>
+                  <Switch
+                    checked={s.is_active}
+                    onCheckedChange={(v) => toggle(s.id, v)}
+                    aria-label="Active"
+                  />
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    aria-label="Copy share link"
+                    onClick={() => copyUrl(s.slug)}
+                  >
+                    <Copy className="size-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    aria-label="Delete share"
+                    onClick={() => remove(s.id)}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
                 </div>
               </div>
             );
@@ -696,7 +1102,12 @@ function DownloadsDialog({ resume, onClose }: { resume: Resume | null; onClose: 
     queryKey: ["resume-downloads", resume?.id],
     enabled: !!resume,
     queryFn: async () => {
-      const { data, error } = await supabase.from("resume_downloads").select("*").eq("resume_id", resume!.id).order("created_at", { ascending: false }).limit(200);
+      const { data, error } = await supabase
+        .from("resume_downloads")
+        .select("*")
+        .eq("resume_id", resume!.id)
+        .order("created_at", { ascending: false })
+        .limit(200);
       if (error) throw error;
       return data ?? [];
     },
@@ -708,13 +1119,19 @@ function DownloadsDialog({ resume, onClose }: { resume: Resume | null; onClose: 
           <DialogTitle>Download history</DialogTitle>
           <DialogDescription>Every time this file was downloaded.</DialogDescription>
         </DialogHeader>
-        {data.length === 0 ? <EmptyState icon={Download} title="No downloads yet" /> : (
+        {data.length === 0 ? (
+          <EmptyState icon={Download} title="No downloads yet" />
+        ) : (
           <ul className="divide-y text-sm max-h-[60vh] overflow-auto">
             {data.map((d) => (
               <li key={d.id} className="py-2 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div>{formatDate(d.created_at)} · {new Date(d.created_at).toLocaleTimeString()}</div>
-                  <div className="text-xs text-muted-foreground truncate">{d.source} · {d.user_agent ?? "unknown"}</div>
+                  <div>
+                    {formatDate(d.created_at)} · {new Date(d.created_at).toLocaleTimeString()}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    {d.source} · {d.user_agent ?? "unknown"}
+                  </div>
                 </div>
               </li>
             ))}
@@ -730,7 +1147,12 @@ function AnalyticsDialog({ resume, onClose }: { resume: Resume | null; onClose: 
     queryKey: ["resume-views", resume?.id],
     enabled: !!resume,
     queryFn: async () => {
-      const { data, error } = await supabase.from("resume_views").select("*").eq("resume_id", resume!.id).order("created_at", { ascending: false }).limit(500);
+      const { data, error } = await supabase
+        .from("resume_views")
+        .select("*")
+        .eq("resume_id", resume!.id)
+        .order("created_at", { ascending: false })
+        .limit(500);
       if (error) throw error;
       return data ?? [];
     },
@@ -739,7 +1161,10 @@ function AnalyticsDialog({ resume, onClose }: { resume: Resume | null; onClose: 
     queryKey: ["resume-downloads-stat", resume?.id],
     enabled: !!resume,
     queryFn: async () => {
-      const { data, error } = await supabase.from("resume_downloads").select("id, created_at").eq("resume_id", resume!.id);
+      const { data, error } = await supabase
+        .from("resume_downloads")
+        .select("id, created_at")
+        .eq("resume_id", resume!.id);
       if (error) throw error;
       return data ?? [];
     },
@@ -747,11 +1172,18 @@ function AnalyticsDialog({ resume, onClose }: { resume: Resume | null; onClose: 
 
   // Bucket last 14 days
   const days = Array.from({ length: 14 }).map((_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (13 - i));
+    const d = new Date();
+    d.setDate(d.getDate() - (13 - i));
     return d.toISOString().slice(0, 10);
   });
-  const viewsByDay = days.map((d) => ({ day: d, count: views.filter((v) => v.created_at.slice(0, 10) === d).length }));
-  const dlByDay = days.map((d) => ({ day: d, count: downloads.filter((v: any) => v.created_at.slice(0, 10) === d).length }));
+  const viewsByDay = days.map((d) => ({
+    day: d,
+    count: views.filter((v) => v.created_at.slice(0, 10) === d).length,
+  }));
+  const dlByDay = days.map((d) => ({
+    day: d,
+    count: downloads.filter((v: any) => v.created_at.slice(0, 10) === d).length,
+  }));
   const maxV = Math.max(1, ...viewsByDay.map((d) => d.count));
   const maxD = Math.max(1, ...dlByDay.map((d) => d.count));
 
@@ -765,7 +1197,12 @@ function AnalyticsDialog({ resume, onClose }: { resume: Resume | null; onClose: 
         <div className="grid grid-cols-3 gap-3 mb-4">
           <StatCard label="Total views" value={views.length} />
           <StatCard label="Total downloads" value={downloads.length} />
-          <StatCard label="Unique days" value={new Set([...views, ...downloads].map((x: any) => x.created_at.slice(0, 10))).size} />
+          <StatCard
+            label="Unique days"
+            value={
+              new Set([...views, ...downloads].map((x: any) => x.created_at.slice(0, 10))).size
+            }
+          />
         </div>
         <div className="space-y-4">
           <MiniBar title="Views" data={viewsByDay} max={maxV} colorClass="bg-primary" />
@@ -785,14 +1222,35 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function MiniBar({ title, data, max, colorClass }: { title: string; data: { day: string; count: number }[]; max: number; colorClass: string }) {
+function MiniBar({
+  title,
+  data,
+  max,
+  colorClass,
+}: {
+  title: string;
+  data: { day: string; count: number }[];
+  max: number;
+  colorClass: string;
+}) {
   return (
     <div>
       <div className="text-xs text-muted-foreground mb-1">{title}</div>
       <div className="flex items-end gap-1 h-24">
         {data.map((d) => (
-          <div key={d.day} className="flex-1 flex flex-col items-center gap-1" title={`${d.day}: ${d.count}`}>
-            <div className={`w-full rounded-sm ${colorClass}`} style={{ height: `${(d.count / max) * 100}%`, minHeight: 2, opacity: d.count === 0 ? 0.2 : 1 }} />
+          <div
+            key={d.day}
+            className="flex-1 flex flex-col items-center gap-1"
+            title={`${d.day}: ${d.count}`}
+          >
+            <div
+              className={`w-full rounded-sm ${colorClass}`}
+              style={{
+                height: `${(d.count / max) * 100}%`,
+                minHeight: 2,
+                opacity: d.count === 0 ? 0.2 : 1,
+              }}
+            />
             <div className="text-[9px] text-muted-foreground">{d.day.slice(5)}</div>
           </div>
         ))}

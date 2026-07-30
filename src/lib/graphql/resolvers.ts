@@ -1,6 +1,12 @@
 import { GraphQLError, GraphQLScalarType, Kind } from "graphql";
 import type { Ctx } from "./server.server";
-import { afterCursorFilter, clampPageSize, decodeCursor, encodeCursor, paginate } from "./pagination";
+import {
+  afterCursorFilter,
+  clampPageSize,
+  decodeCursor,
+  encodeCursor,
+  paginate,
+} from "./pagination";
 
 const DateTimeScalar = new GraphQLScalarType({
   name: "DateTime",
@@ -102,8 +108,14 @@ export function buildResolvers() {
       async me(_: unknown, __: unknown, ctx: Ctx) {
         if (!ctx.userId) return null;
         const [appsC, resC, intC, refC, aiC] = await Promise.all([
-          ctx.supabase.from("applications").select("id", { count: "exact", head: true }).is("deleted_at", null),
-          ctx.supabase.from("resumes").select("id", { count: "exact", head: true }).is("deleted_at", null),
+          ctx.supabase
+            .from("applications")
+            .select("id", { count: "exact", head: true })
+            .is("deleted_at", null),
+          ctx.supabase
+            .from("resumes")
+            .select("id", { count: "exact", head: true })
+            .is("deleted_at", null),
           ctx.supabase.from("interview_sessions").select("id", { count: "exact", head: true }),
           ctx.supabase.from("referrals").select("id", { count: "exact", head: true }),
           ctx.supabase.from("ai_analyses").select("id", { count: "exact", head: true }),
@@ -145,7 +157,10 @@ export function buildResolvers() {
           const f = args.filter ?? {};
           if (f.status) q = q.eq("status", f.status);
           if (f.company) q = q.ilike("company", `%${f.company}%`);
-          if (f.search) q = q.or(`company.ilike.%${f.search}%,role.ilike.%${f.search}%,notes.ilike.%${f.search}%`);
+          if (f.search)
+            q = q.or(
+              `company.ilike.%${f.search}%,role.ilike.%${f.search}%,notes.ilike.%${f.search}%`,
+            );
           if (f.createdAfter) q = q.gte("created_at", f.createdAfter);
           if (f.createdBefore) q = q.lte("created_at", f.createdBefore);
           const ac = afterCursorFilter(after);
@@ -191,10 +206,14 @@ export function buildResolvers() {
       },
 
       aiAnalyses: (_: unknown, args: any, ctx: Ctx) => listAi(ctx, args),
-      resumeAnalyses: (_: unknown, args: any, ctx: Ctx) => listAi(ctx, { ...args, filter: { kind: "resume_analysis" } }),
-      jobMatches: (_: unknown, args: any, ctx: Ctx) => listAi(ctx, { ...args, filter: { kind: "job_match" } }),
-      interviewCoachSessions: (_: unknown, args: any, ctx: Ctx) => listAi(ctx, { ...args, filter: { kind: "interview_prep" } }),
-      careerCoachPlans: (_: unknown, args: any, ctx: Ctx) => listAi(ctx, { ...args, filter: { kind: "career_plan" } }),
+      resumeAnalyses: (_: unknown, args: any, ctx: Ctx) =>
+        listAi(ctx, { ...args, filter: { kind: "resume_analysis" } }),
+      jobMatches: (_: unknown, args: any, ctx: Ctx) =>
+        listAi(ctx, { ...args, filter: { kind: "job_match" } }),
+      interviewCoachSessions: (_: unknown, args: any, ctx: Ctx) =>
+        listAi(ctx, { ...args, filter: { kind: "interview_prep" } }),
+      careerCoachPlans: (_: unknown, args: any, ctx: Ctx) =>
+        listAi(ctx, { ...args, filter: { kind: "career_plan" } }),
 
       async interviewSessions(_: unknown, args: any, ctx: Ctx) {
         ctx.requireAuth();
@@ -263,8 +282,12 @@ export function buildResolvers() {
         ]);
         const rows = apps.data ?? [];
         const byStatusMap = new Map<string, number>();
-        for (const r of rows) byStatusMap.set(r.status as string, (byStatusMap.get(r.status as string) ?? 0) + 1);
-        const byStatus = Array.from(byStatusMap.entries()).map(([status, c]) => ({ status, count: c }));
+        for (const r of rows)
+          byStatusMap.set(r.status as string, (byStatusMap.get(r.status as string) ?? 0) + 1);
+        const byStatus = Array.from(byStatusMap.entries()).map(([status, c]) => ({
+          status,
+          count: c,
+        }));
         const weekMap = new Map<string, number>();
         for (const r of rows) {
           const d = new Date(r.created_at as string);
@@ -276,13 +299,22 @@ export function buildResolvers() {
         const applicationsPerWeek = Array.from(weekMap.entries())
           .sort(([a], [b]) => (a < b ? -1 : 1))
           .map(([date, c]) => ({ date, count: c }));
-        const scores = (sessions.data ?? []).map((s) => Number(s.overall_score)).filter((n) => Number.isFinite(n));
+        const scores = (sessions.data ?? [])
+          .map((s) => Number(s.overall_score))
+          .filter((n) => Number.isFinite(n));
         const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
-        const last = rows.length ? rows.map((r) => r.created_at as string).sort().pop() : null;
+        const last = rows.length
+          ? rows
+              .map((r) => r.created_at as string)
+              .sort()
+              .pop()
+          : null;
         const bucketFor = (needle: string) => byStatusMap.get(needle) ?? 0;
         return {
           totalApplications: rows.length,
-          activeApplications: rows.filter((r) => !["rejected", "withdrawn", "offer"].includes(String(r.status))).length,
+          activeApplications: rows.filter(
+            (r) => !["rejected", "withdrawn", "offer"].includes(String(r.status)),
+          ).length,
           interviewsScheduled: bucketFor("interview") + bucketFor("interviewing"),
           offers: bucketFor("offer"),
           rejections: bucketFor("rejected"),
@@ -326,8 +358,12 @@ export function buildResolvers() {
           pageInfo: {
             hasNextPage: hasNext,
             hasPreviousPage: false,
-            startCursor: nodes[0] ? encodeCursor({ ts: nodes[0].createdAt as string, id: nodes[0].id }) : null,
-            endCursor: nodes.at(-1) ? encodeCursor({ ts: nodes.at(-1)!.createdAt as string, id: nodes.at(-1)!.id }) : null,
+            startCursor: nodes[0]
+              ? encodeCursor({ ts: nodes[0].createdAt as string, id: nodes[0].id })
+              : null,
+            endCursor: nodes.at(-1)
+              ? encodeCursor({ ts: nodes.at(-1)!.createdAt as string, id: nodes.at(-1)!.id })
+              : null,
           },
         };
       },
@@ -349,7 +385,12 @@ export function buildResolvers() {
         if (args.input.headline !== undefined) patch.headline = args.input.headline;
         if (args.input.targetRole !== undefined) patch.target_role = args.input.targetRole;
         if (args.input.avatarUrl !== undefined) patch.avatar_url = args.input.avatarUrl;
-        const { data, error } = await ctx.supabase.from("profiles").update(patch as any).eq("id", uid).select("*").maybeSingle();
+        const { data, error } = await ctx.supabase
+          .from("profiles")
+          .update(patch as any)
+          .eq("id", uid)
+          .select("*")
+          .maybeSingle();
         if (error) throw new GraphQLError(error.message);
         return toRow(data);
       },
@@ -357,7 +398,10 @@ export function buildResolvers() {
       async createApplication(_: unknown, args: { input: any }, ctx: Ctx) {
         const uid = ctx.requireAuth();
         const i = args.input;
-        if (!i.company?.trim() || !i.role?.trim()) throw new GraphQLError("company and role are required", { extensions: { code: "BAD_USER_INPUT" } });
+        if (!i.company?.trim() || !i.role?.trim())
+          throw new GraphQLError("company and role are required", {
+            extensions: { code: "BAD_USER_INPUT" },
+          });
         const { data, error } = await ctx.supabase
           .from("applications")
           .insert({
@@ -383,20 +427,36 @@ export function buildResolvers() {
         const i = args.input as Record<string, unknown>;
         const patch: Record<string, unknown> = {};
         const map: Record<string, string> = {
-          company: "company", role: "role", location: "location", salary: "salary",
-          status: "status", jobUrl: "job_url", recruiter: "recruiter", notes: "notes",
-          deadline: "deadline", followUpAt: "follow_up_at",
+          company: "company",
+          role: "role",
+          location: "location",
+          salary: "salary",
+          status: "status",
+          jobUrl: "job_url",
+          recruiter: "recruiter",
+          notes: "notes",
+          deadline: "deadline",
+          followUpAt: "follow_up_at",
         };
         for (const [gql, col] of Object.entries(map)) if (i[gql] !== undefined) patch[col] = i[gql];
-        const { data, error } = await ctx.supabase.from("applications").update(patch as any).eq("id", args.id).select("*").maybeSingle();
+        const { data, error } = await ctx.supabase
+          .from("applications")
+          .update(patch as any)
+          .eq("id", args.id)
+          .select("*")
+          .maybeSingle();
         if (error) throw new GraphQLError(error.message);
-        if (!data) throw new GraphQLError("Application not found", { extensions: { code: "NOT_FOUND" } });
+        if (!data)
+          throw new GraphQLError("Application not found", { extensions: { code: "NOT_FOUND" } });
         return toRow(data);
       },
 
       async deleteApplication(_: unknown, args: { id: string }, ctx: Ctx) {
         ctx.requireAuth();
-        const { error } = await ctx.supabase.from("applications").update({ deleted_at: new Date().toISOString() }).eq("id", args.id);
+        const { error } = await ctx.supabase
+          .from("applications")
+          .update({ deleted_at: new Date().toISOString() })
+          .eq("id", args.id);
         if (error) throw new GraphQLError(error.message);
         return true;
       },

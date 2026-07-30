@@ -26,7 +26,8 @@ type ServerHandler = (ctx: { request: Request }) => Promise<Response> | Response
 const routeOptions = {
   server: {
     handlers: {
-      OPTIONS: (async () => new Response(null, { status: 204, headers: CORS_HEADERS })) satisfies ServerHandler,
+      OPTIONS: (async () =>
+        new Response(null, { status: 204, headers: CORS_HEADERS })) satisfies ServerHandler,
       GET: (async ({ request }) => handle(request)) satisfies ServerHandler,
       POST: (async ({ request }) => handle(request)) satisfies ServerHandler,
     },

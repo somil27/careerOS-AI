@@ -20,12 +20,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { LoadingState, EmptyState } from "@/components/state-views";
 import {
-  Loader2, Mic, MicOff, Video, VideoOff, Send, Sparkles, Play, Square,
-  History, Trash2, Download, MessageSquareText, Award, TrendingUp, Gauge,
+  Loader2,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Send,
+  Sparkles,
+  Play,
+  Square,
+  History,
+  Trash2,
+  Download,
+  MessageSquareText,
+  Award,
+  TrendingUp,
+  Gauge,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/format";
@@ -49,7 +69,19 @@ const TYPE_LABELS: Record<IType, string> = {
   coding: "Coding",
 };
 
-const FILLERS = ["um", "uh", "like", "you know", "so", "actually", "basically", "literally", "right", "kinda", "sorta"];
+const FILLERS = [
+  "um",
+  "uh",
+  "like",
+  "you know",
+  "so",
+  "actually",
+  "basically",
+  "literally",
+  "right",
+  "kinda",
+  "sorta",
+];
 
 function countFillers(text: string): { total: number; byWord: Record<string, number> } {
   const lower = ` ${text.toLowerCase().replace(/[^a-z\s']/g, " ")} `;
@@ -58,7 +90,10 @@ function countFillers(text: string): { total: number; byWord: Record<string, num
   for (const f of FILLERS) {
     const re = new RegExp(`\\s${f.replace(/'/g, "\\'")}\\s`, "g");
     const m = lower.match(re);
-    if (m) { by[f] = m.length; total += m.length; }
+    if (m) {
+      by[f] = m.length;
+      total += m.length;
+    }
   }
   return { total, byWord: by };
 }
@@ -79,9 +114,12 @@ function speak(text: string) {
   try {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = 1; u.pitch = 1;
+    u.rate = 1;
+    u.pitch = 1;
     window.speechSynthesis.speak(u);
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 function MockInterview() {
@@ -133,10 +171,14 @@ function MockInterview() {
   const chunksRef = useRef<Blob[]>([]);
   const transcribeFn = useServerFn(transcribeAudio);
 
-  useEffect(() => () => {
-    if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
-    if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
-  }, []);
+  useEffect(
+    () => () => {
+      if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
+      if (typeof window !== "undefined" && "speechSynthesis" in window)
+        window.speechSynthesis.cancel();
+    },
+    [],
+  );
 
   async function toggleWebcam(on: boolean) {
     if (on) {
@@ -161,14 +203,21 @@ function MockInterview() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mr = new MediaRecorder(stream);
       chunksRef.current = [];
-      mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
       mr.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
-        if (blob.size < 1500) { toast.error("Recording too short"); return; }
+        if (blob.size < 1500) {
+          toast.error("Recording too short");
+          return;
+        }
         const b64 = await blobToBase64(blob);
         try {
-          const { text } = await transcribeFn({ data: { audio_base64: b64, mime: mr.mimeType || "audio/webm" } });
+          const { text } = await transcribeFn({
+            data: { audio_base64: b64, mime: mr.mimeType || "audio/webm" },
+          });
           if (text) setAnswer((prev) => (prev ? prev + " " : "") + text);
           else toast.error("No speech detected");
         } catch (e) {
@@ -202,7 +251,10 @@ function MockInterview() {
           job_description: setup.job_description,
         },
       });
-      setSession({ id: (res.session as { id: string }).id, created_at: (res.session as { created_at?: string }).created_at });
+      setSession({
+        id: (res.session as { id: string }).id,
+        created_at: (res.session as { created_at?: string }).created_at,
+      });
       const first = res.questions[0]?.prompt ?? res.intro;
       const initial: Turn[] = [
         { role: "interviewer", content: res.intro, ts: Date.now() },
@@ -258,9 +310,14 @@ function MockInterview() {
     if (!session) return;
     setAnalyzing(true);
     try {
-      const durationSec = startedAtRef.current ? Math.round((Date.now() - startedAtRef.current) / 1000) : null;
+      const durationSec = startedAtRef.current
+        ? Math.round((Date.now() - startedAtRef.current) / 1000)
+        : null;
       const totalFillers = Object.values(fillerByWordRef.current).reduce((a, b) => a + b, 0);
-      const wpm = durationSec && durationSec > 0 ? Math.round((totalWordsRef.current / durationSec) * 60) : null;
+      const wpm =
+        durationSec && durationSec > 0
+          ? Math.round((totalWordsRef.current / durationSec) * 60)
+          : null;
       const res = await analyzeFn({
         data: {
           session_id: session.id,
@@ -301,8 +358,12 @@ function MockInterview() {
       />
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
-          <TabsTrigger value="new"><Sparkles className="size-4" /> Studio</TabsTrigger>
-          <TabsTrigger value="history"><History className="size-4" /> History</TabsTrigger>
+          <TabsTrigger value="new">
+            <Sparkles className="size-4" /> Studio
+          </TabsTrigger>
+          <TabsTrigger value="history">
+            <History className="size-4" /> History
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="new" className="mt-6 space-y-6">
@@ -321,13 +382,20 @@ function MockInterview() {
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                       <MessageSquareText className="size-4" />
-                      {TYPE_LABELS[setup.interview_type]} · {setup.role || "Candidate"} @ {setup.company || "Company"}
+                      {TYPE_LABELS[setup.interview_type]} · {setup.role || "Candidate"} @{" "}
+                      {setup.company || "Company"}
                     </CardTitle>
                     <Badge variant="outline">{setup.mode}</Badge>
                   </CardHeader>
-                  <CardContent className="space-y-3 max-h-[420px] overflow-y-auto" aria-live="polite">
+                  <CardContent
+                    className="space-y-3 max-h-[420px] overflow-y-auto"
+                    aria-live="polite"
+                  >
                     {turns.map((t, i) => (
-                      <div key={i} className={`rounded-lg border p-3 text-sm ${t.role === "interviewer" ? "bg-accent/40" : "bg-card"}`}>
+                      <div
+                        key={i}
+                        className={`rounded-lg border p-3 text-sm ${t.role === "interviewer" ? "bg-accent/40" : "bg-card"}`}
+                      >
                         <div className="text-xs font-medium text-muted-foreground mb-1">
                           {t.role === "interviewer" ? "Interviewer" : "You"}
                         </div>
@@ -369,20 +437,30 @@ function MockInterview() {
                             </Button>
                           )
                         ) : null}
-                        <Button variant="ghost" onClick={() => setEnded(true)}>End interview</Button>
+                        <Button variant="ghost" onClick={() => setEnded(true)}>
+                          End interview
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
                 ) : (
                   <Card>
                     <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
-                      <div className="text-sm text-muted-foreground">Interview ended. Run analysis to see your scores and feedback.</div>
+                      <div className="text-sm text-muted-foreground">
+                        Interview ended. Run analysis to see your scores and feedback.
+                      </div>
                       <div className="flex gap-2">
                         <Button onClick={onFinish} disabled={analyzing}>
-                          {analyzing ? <Loader2 className="size-4 animate-spin" /> : <Award className="size-4" />}
+                          {analyzing ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            <Award className="size-4" />
+                          )}
                           Analyze interview
                         </Button>
-                        <Button variant="ghost" onClick={reset}>Start over</Button>
+                        <Button variant="ghost" onClick={reset}>
+                          Start over
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -393,18 +471,32 @@ function MockInterview() {
 
               <div className="space-y-4">
                 <Card>
-                  <CardHeader><CardTitle className="text-sm">Camera</CardTitle></CardHeader>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Camera</CardTitle>
+                  </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="aspect-video rounded-md bg-muted overflow-hidden grid place-items-center">
                       {webcamOn ? (
-                        <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                        <video
+                          ref={videoRef}
+                          autoPlay
+                          playsInline
+                          muted
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
-                        <div className="text-xs text-muted-foreground flex items-center gap-2"><VideoOff className="size-4" /> Off</div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-2">
+                          <VideoOff className="size-4" /> Off
+                        </div>
                       )}
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span>Webcam</span>
-                      <Switch checked={webcamOn} onCheckedChange={toggleWebcam} aria-label="Toggle webcam" />
+                      <Switch
+                        checked={webcamOn}
+                        onCheckedChange={toggleWebcam}
+                        aria-label="Toggle webcam"
+                      />
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span>Speak questions aloud</span>
@@ -423,8 +515,13 @@ function MockInterview() {
             data={historyQ.data ?? []}
             loading={historyQ.isLoading}
             onDelete={async (id) => {
-              try { await deleteFn({ data: { id } }); qc.invalidateQueries({ queryKey: ["mock-interview-sessions"] }); toast.success("Deleted"); }
-              catch (e) { toast.error(e instanceof Error ? e.message : "Delete failed"); }
+              try {
+                await deleteFn({ data: { id } });
+                qc.invalidateQueries({ queryKey: ["mock-interview-sessions"] });
+                toast.success("Deleted");
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Delete failed");
+              }
             }}
           />
         </TabsContent>
@@ -434,10 +531,20 @@ function MockInterview() {
 }
 
 function SetupCard({
-  setup, setSetup, onStart, starting, hasResume,
+  setup,
+  setSetup,
+  onStart,
+  starting,
+  hasResume,
 }: {
   setup: {
-    interview_type: IType; company: string; role: string; difficulty: Difficulty; mode: Mode; use_resume: boolean; job_description: string;
+    interview_type: IType;
+    company: string;
+    role: string;
+    difficulty: Difficulty;
+    mode: Mode;
+    use_resume: boolean;
+    job_description: string;
   };
   setSetup: (s: typeof setup) => void;
   onStart: () => void;
@@ -446,23 +553,37 @@ function SetupCard({
 }) {
   return (
     <Card>
-      <CardHeader><CardTitle>Configure your mock interview</CardTitle></CardHeader>
+      <CardHeader>
+        <CardTitle>Configure your mock interview</CardTitle>
+      </CardHeader>
       <CardContent className="grid gap-4 md:grid-cols-2">
         <div className="space-y-1.5">
           <Label>Interview type</Label>
-          <Select value={setup.interview_type} onValueChange={(v) => setSetup({ ...setup, interview_type: v as IType })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+          <Select
+            value={setup.interview_type}
+            onValueChange={(v) => setSetup({ ...setup, interview_type: v as IType })}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {(Object.keys(TYPE_LABELS) as IType[]).map((k) => (
-                <SelectItem key={k} value={k}>{TYPE_LABELS[k]}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {TYPE_LABELS[k]}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
           <Label>Difficulty</Label>
-          <Select value={setup.difficulty} onValueChange={(v) => setSetup({ ...setup, difficulty: v as Difficulty })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+          <Select
+            value={setup.difficulty}
+            onValueChange={(v) => setSetup({ ...setup, difficulty: v as Difficulty })}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="easy">Easy</SelectItem>
               <SelectItem value="medium">Medium</SelectItem>
@@ -472,20 +593,37 @@ function SetupCard({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="company">Company</Label>
-          <Input id="company" placeholder="e.g. Stripe" value={setup.company} onChange={(e) => setSetup({ ...setup, company: e.target.value })} />
+          <Input
+            id="company"
+            placeholder="e.g. Stripe"
+            value={setup.company}
+            onChange={(e) => setSetup({ ...setup, company: e.target.value })}
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="role">Role</Label>
-          <Input id="role" placeholder="e.g. Senior Frontend Engineer" value={setup.role} onChange={(e) => setSetup({ ...setup, role: e.target.value })} />
+          <Input
+            id="role"
+            placeholder="e.g. Senior Frontend Engineer"
+            value={setup.role}
+            onChange={(e) => setSetup({ ...setup, role: e.target.value })}
+          />
         </div>
         <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="jd">Job description (optional)</Label>
-          <Textarea id="jd" rows={3} value={setup.job_description} onChange={(e) => setSetup({ ...setup, job_description: e.target.value })} />
+          <Textarea
+            id="jd"
+            rows={3}
+            value={setup.job_description}
+            onChange={(e) => setSetup({ ...setup, job_description: e.target.value })}
+          />
         </div>
         <div className="space-y-1.5">
           <Label>Mode</Label>
           <Select value={setup.mode} onValueChange={(v) => setSetup({ ...setup, mode: v as Mode })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="text">Text only</SelectItem>
               <SelectItem value="voice">Voice</SelectItem>
@@ -495,8 +633,15 @@ function SetupCard({
         </div>
         <div className="flex items-end gap-3">
           <div className="flex items-center gap-2">
-            <Switch checked={setup.use_resume} onCheckedChange={(v) => setSetup({ ...setup, use_resume: v })} disabled={!hasResume} aria-label="Use active resume" />
-            <span className="text-sm">Personalize with my active resume {hasResume ? "" : "(none set)"}</span>
+            <Switch
+              checked={setup.use_resume}
+              onCheckedChange={(v) => setSetup({ ...setup, use_resume: v })}
+              disabled={!hasResume}
+              aria-label="Use active resume"
+            />
+            <span className="text-sm">
+              Personalize with my active resume {hasResume ? "" : "(none set)"}
+            </span>
           </div>
         </div>
         <div className="md:col-span-2 flex justify-end">
@@ -511,14 +656,21 @@ function SetupCard({
 }
 
 function LiveMetrics({ turns, startedAt }: { turns: Turn[]; startedAt: number | null }) {
-  const answers = turns.filter((t) => t.role === "candidate").map((t) => t.content).join(" ");
+  const answers = turns
+    .filter((t) => t.role === "candidate")
+    .map((t) => t.content)
+    .join(" ");
   const words = wordsIn(answers);
   const fillers = countFillers(answers);
   const elapsedSec = startedAt ? Math.max(1, Math.round((Date.now() - startedAt) / 1000)) : 0;
   const wpm = elapsedSec > 0 ? Math.round((words / elapsedSec) * 60) : 0;
   return (
     <Card>
-      <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Gauge className="size-4" /> Live metrics</CardTitle></CardHeader>
+      <CardHeader>
+        <CardTitle className="text-sm flex items-center gap-2">
+          <Gauge className="size-4" /> Live metrics
+        </CardTitle>
+      </CardHeader>
       <CardContent className="text-sm space-y-2">
         <Row label="Words spoken" value={String(words)} />
         <Row label="Speaking speed" value={wpm ? `${wpm} WPM` : "—"} />
@@ -530,18 +682,38 @@ function LiveMetrics({ turns, startedAt }: { turns: Turn[]; startedAt: number | 
 }
 
 function Row({ label, value }: { label: string; value: string }) {
-  return <div className="flex justify-between"><span className="text-muted-foreground">{label}</span><span className="font-medium">{value}</span></div>;
+  return (
+    <div className="flex justify-between">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium">{value}</span>
+    </div>
+  );
 }
 
 function AnalysisPanel({ analysis }: { analysis: Record<string, unknown> }) {
   const a = analysis as {
-    overall_score: number; confidence_score: number; communication_score: number;
-    technical_score: number; behavioral_score: number;
-    sentiment: string; grammar_review: string; vocabulary_quality: string; star_evaluation: string;
-    strengths: string[]; weaknesses: string[]; improvement_suggestions: string[];
-    study_topics: string[]; prep_plan: string[];
+    overall_score: number;
+    confidence_score: number;
+    communication_score: number;
+    technical_score: number;
+    behavioral_score: number;
+    sentiment: string;
+    grammar_review: string;
+    vocabulary_quality: string;
+    star_evaluation: string;
+    strengths: string[];
+    weaknesses: string[];
+    improvement_suggestions: string[];
+    study_topics: string[];
+    prep_plan: string[];
     sample_answers: Array<{ question: string; better_answer: string }>;
-    metrics?: { wpm?: number | null; filler_count?: number | null; duration_seconds?: number | null; eye_contact_score?: number | null; facial_expression?: string };
+    metrics?: {
+      wpm?: number | null;
+      filler_count?: number | null;
+      duration_seconds?: number | null;
+      eye_contact_score?: number | null;
+      facial_expression?: string;
+    };
   };
 
   const scores: Array<[string, number]> = [
@@ -557,15 +729,21 @@ function AnalysisPanel({ analysis }: { analysis: Record<string, unknown> }) {
     const blob = new Blob([report], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = url; link.download = `interview-report-${Date.now()}.md`;
-    link.click(); URL.revokeObjectURL(url);
+    link.href = url;
+    link.download = `interview-report-${Date.now()}.md`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2"><Award className="size-4" /> Interview analysis</CardTitle>
-        <Button variant="outline" size="sm" onClick={download}><Download className="size-4" /> Download report</Button>
+        <CardTitle className="flex items-center gap-2">
+          <Award className="size-4" /> Interview analysis
+        </CardTitle>
+        <Button variant="outline" size="sm" onClick={download}>
+          <Download className="size-4" /> Download report
+        </Button>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-5">
@@ -580,10 +758,21 @@ function AnalysisPanel({ analysis }: { analysis: Record<string, unknown> }) {
 
         {a.metrics ? (
           <div className="grid gap-3 sm:grid-cols-4 text-sm">
-            <MetricTile label="Speaking speed" value={a.metrics.wpm ? `${a.metrics.wpm} WPM` : "—"} />
+            <MetricTile
+              label="Speaking speed"
+              value={a.metrics.wpm ? `${a.metrics.wpm} WPM` : "—"}
+            />
             <MetricTile label="Filler words" value={String(a.metrics.filler_count ?? "—")} />
-            <MetricTile label="Duration" value={a.metrics.duration_seconds ? `${Math.round(a.metrics.duration_seconds / 60)}m` : "—"} />
-            <MetricTile label="Eye contact" value={a.metrics.eye_contact_score != null ? `${a.metrics.eye_contact_score}` : "N/A"} />
+            <MetricTile
+              label="Duration"
+              value={
+                a.metrics.duration_seconds ? `${Math.round(a.metrics.duration_seconds / 60)}m` : "—"
+              }
+            />
+            <MetricTile
+              label="Eye contact"
+              value={a.metrics.eye_contact_score != null ? `${a.metrics.eye_contact_score}` : "N/A"}
+            />
           </div>
         ) : null}
 
@@ -605,7 +794,9 @@ function AnalysisPanel({ analysis }: { analysis: Record<string, unknown> }) {
         <div>
           <div className="text-sm font-medium mb-2">Personalized prep plan</div>
           <ol className="space-y-1.5 text-sm list-decimal pl-5">
-            {a.prep_plan?.map((p, i) => <li key={i}>{p}</li>)}
+            {a.prep_plan?.map((p, i) => (
+              <li key={i}>{p}</li>
+            ))}
           </ol>
         </div>
 
@@ -634,14 +825,27 @@ function MetricTile({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ListCard({ title, items, tone }: { title: string; items?: string[]; tone?: "success" | "destructive" }) {
-  const cls = tone === "success" ? "text-success" : tone === "destructive" ? "text-destructive" : "";
+function ListCard({
+  title,
+  items,
+  tone,
+}: {
+  title: string;
+  items?: string[];
+  tone?: "success" | "destructive";
+}) {
+  const cls =
+    tone === "success" ? "text-success" : tone === "destructive" ? "text-destructive" : "";
   return (
     <div className="rounded-lg border p-3">
       <div className={`text-sm font-medium mb-2 ${cls}`}>{title}</div>
       <ul className="space-y-1 text-sm list-disc pl-5">
-        {(items ?? []).map((s, i) => <li key={i}>{s}</li>)}
-        {(!items || items.length === 0) ? <li className="list-none text-muted-foreground">—</li> : null}
+        {(items ?? []).map((s, i) => (
+          <li key={i}>{s}</li>
+        ))}
+        {!items || items.length === 0 ? (
+          <li className="list-none text-muted-foreground">—</li>
+        ) : null}
       </ul>
     </div>
   );
@@ -657,7 +861,9 @@ function QCard({ title, body }: { title: string; body?: string }) {
 }
 
 function HistoryView({
-  data, loading, onDelete,
+  data,
+  loading,
+  onDelete,
 }: {
   data: Array<Record<string, unknown>>;
   loading: boolean;
@@ -671,7 +877,10 @@ function HistoryView({
   const trend = useMemo(() => {
     const arr = [...completed].reverse();
     const max = arr.length;
-    return arr.map((s, i) => ({ x: i / Math.max(1, max - 1), y: Number((s as { overall_score?: number }).overall_score ?? 0) }));
+    return arr.map((s, i) => ({
+      x: i / Math.max(1, max - 1),
+      y: Number((s as { overall_score?: number }).overall_score ?? 0),
+    }));
   }, [completed]);
 
   const strongest = useMemo(() => aggregateSkill(completed, "high"), [completed]);
@@ -679,17 +888,29 @@ function HistoryView({
 
   if (loading) return <LoadingState label="Loading interview history…" />;
   if (data.length === 0) {
-    return <EmptyState icon={History} title="No interviews yet" description="Run your first mock interview to build your history and track progress." />;
+    return (
+      <EmptyState
+        icon={History}
+        title="No interviews yet"
+        description="Run your first mock interview to build your history and track progress."
+      />
+    );
   }
 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardHeader><CardTitle className="text-sm flex items-center gap-2"><TrendingUp className="size-4" /> Score trend</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <TrendingUp className="size-4" /> Score trend
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <Sparkline data={trend} />
-            <div className="mt-2 text-xs text-muted-foreground">Overall score across {completed.length} completed interviews</div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              Overall score across {completed.length} completed interviews
+            </div>
           </CardContent>
         </Card>
         <ListCard title="Strongest skills" items={strongest} tone="success" />
@@ -699,24 +920,38 @@ function HistoryView({
       <div className="space-y-2">
         {data.map((s) => {
           const row = s as {
-            id: string; interview_type: string; company?: string; role?: string;
-            status: string; overall_score?: number; confidence_score?: number;
-            communication_score?: number; created_at: string;
+            id: string;
+            interview_type: string;
+            company?: string;
+            role?: string;
+            status: string;
+            overall_score?: number;
+            confidence_score?: number;
+            communication_score?: number;
+            created_at: string;
           };
           return (
             <Card key={row.id}>
               <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="text-sm font-medium">
-                    {TYPE_LABELS[row.interview_type as IType] ?? row.interview_type} · {row.role || "—"} @ {row.company || "—"}
+                    {TYPE_LABELS[row.interview_type as IType] ?? row.interview_type} ·{" "}
+                    {row.role || "—"} @ {row.company || "—"}
                   </div>
-                  <div className="text-xs text-muted-foreground">{formatDate(row.created_at)} · {row.status}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {formatDate(row.created_at)} · {row.status}
+                  </div>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                   <ScoreChip label="Overall" n={row.overall_score} />
                   <ScoreChip label="Confidence" n={row.confidence_score} />
                   <ScoreChip label="Comms" n={row.communication_score} />
-                  <Button size="sm" variant="ghost" onClick={() => onDelete(row.id)} aria-label="Delete">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onDelete(row.id)}
+                    aria-label="Delete"
+                  >
                     <Trash2 className="size-4" />
                   </Button>
                 </div>
@@ -733,19 +968,31 @@ function ScoreChip({ label, n }: { label: string; n?: number | null }) {
   return (
     <div className="text-xs">
       <div className="text-muted-foreground">{label}</div>
-      <div className={`text-base font-semibold ${scoreTone(n)}`}>{n != null ? Math.round(n) : "—"}</div>
+      <div className={`text-base font-semibold ${scoreTone(n)}`}>
+        {n != null ? Math.round(n) : "—"}
+      </div>
     </div>
   );
 }
 
 function Sparkline({ data }: { data: Array<{ x: number; y: number }> }) {
   if (data.length === 0) return <div className="h-16 text-xs text-muted-foreground">No data</div>;
-  const w = 240, h = 60, pad = 4;
+  const w = 240,
+    h = 60,
+    pad = 4;
   const maxY = 100;
-  const pts = data.map((d) => `${pad + d.x * (w - pad * 2)},${h - pad - (d.y / maxY) * (h - pad * 2)}`).join(" ");
+  const pts = data
+    .map((d) => `${pad + d.x * (w - pad * 2)},${h - pad - (d.y / maxY) * (h - pad * 2)}`)
+    .join(" ");
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-16" aria-label="Score trend">
-      <polyline fill="none" stroke="currentColor" strokeWidth="2" points={pts} className="text-primary" />
+      <polyline
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        points={pts}
+        className="text-primary"
+      />
     </svg>
   );
 }
@@ -769,11 +1016,20 @@ function aggregateSkill(sessions: Array<Record<string, unknown>>, dir: "high" | 
 }
 
 function renderReport(a: {
-  overall_score: number; confidence_score: number; communication_score: number;
-  technical_score: number; behavioral_score: number;
-  sentiment: string; grammar_review: string; vocabulary_quality: string; star_evaluation: string;
-  strengths: string[]; weaknesses: string[]; improvement_suggestions: string[];
-  study_topics: string[]; prep_plan: string[];
+  overall_score: number;
+  confidence_score: number;
+  communication_score: number;
+  technical_score: number;
+  behavioral_score: number;
+  sentiment: string;
+  grammar_review: string;
+  vocabulary_quality: string;
+  star_evaluation: string;
+  strengths: string[];
+  weaknesses: string[];
+  improvement_suggestions: string[];
+  study_topics: string[];
+  prep_plan: string[];
   sample_answers: Array<{ question: string; better_answer: string }>;
 }): string {
   return `# Interview Analysis Report
@@ -823,7 +1079,10 @@ async function blobToBase64(blob: Blob): Promise<string> {
   const bytes = new Uint8Array(buf);
   const chunk = 0x8000;
   for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as unknown as number[]);
+    binary += String.fromCharCode.apply(
+      null,
+      Array.from(bytes.subarray(i, i + chunk)) as unknown as number[],
+    );
   }
   return btoa(binary);
 }

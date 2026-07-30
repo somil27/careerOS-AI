@@ -3,9 +3,27 @@ import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  LayoutDashboard, Briefcase, FileText, Wand2, FileSignature, Target, MessageSquare,
-  Compass, Users, NotebookPen, BarChart3, Settings, Sparkles, LogOut, Menu, X,
-  Search, Sun, Moon, Monitor, Chrome,
+  LayoutDashboard,
+  Briefcase,
+  FileText,
+  Wand2,
+  FileSignature,
+  Target,
+  MessageSquare,
+  Compass,
+  Users,
+  NotebookPen,
+  BarChart3,
+  Settings,
+  Sparkles,
+  LogOut,
+  Menu,
+  X,
+  Search,
+  Sun,
+  Moon,
+  Monitor,
+  Chrome,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -13,7 +31,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CommandPalette, useCommandPalette } from "./command-palette";
 import { useTheme } from "./theme-provider";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 const nav = [
@@ -44,9 +65,15 @@ function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}><Sun className="size-4" /> Light</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}><Moon className="size-4" /> Dark</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}><Monitor className="size-4" /> System</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          <Sun className="size-4" /> Light
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          <Moon className="size-4" /> Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          <Monitor className="size-4" /> System
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -64,7 +91,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ""));
   }, []);
 
-  useEffect(() => { setMobileOpen(false); }, [path]);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [path]);
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -99,13 +128,20 @@ export function AppShell({ children }: { children: ReactNode }) {
         aria-label="Primary"
       >
         <div className="px-5 py-5 flex items-center justify-between">
-          <Link to="/dashboard" className="flex items-center gap-2 font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-2 font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+          >
             <div className="size-8 rounded-lg bg-primary text-primary-foreground grid place-items-center shadow-card">
               <Sparkles className="size-4" />
             </div>
             <span>CareerOS AI</span>
           </Link>
-          <button className="md:hidden min-h-11 min-w-11 grid place-items-center -mr-2" onClick={() => setMobileOpen(false)} aria-label="Close menu">
+          <button
+            className="md:hidden min-h-11 min-w-11 grid place-items-center -mr-2"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close menu"
+          >
             <X className="size-5" />
           </button>
         </div>
@@ -126,7 +162,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <nav className="flex-1 overflow-y-auto px-3 pb-3 space-y-0.5">
           {nav.map((item) => {
-            const active = path === item.to || (item.to !== "/dashboard" && path.startsWith(item.to));
+            const active =
+              path === item.to || (item.to !== "/dashboard" && path.startsWith(item.to));
             return (
               <Link
                 key={item.to}
@@ -142,7 +179,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                     aria-hidden
                   />
                 ) : null}
-                <item.icon className={`size-4 transition ${active ? "text-primary" : "opacity-70 group-hover:opacity-100"}`} />
+                <item.icon
+                  className={`size-4 transition ${active ? "text-primary" : "opacity-70 group-hover:opacity-100"}`}
+                />
                 {item.label}
               </Link>
             );
@@ -159,7 +198,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               <div className="text-[10px] text-muted-foreground">Signed in</div>
             </div>
             <ThemeToggle />
-            <Button size="icon" variant="ghost" onClick={signOut} aria-label="Sign out" className="h-9 w-9">
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={signOut}
+              aria-label="Sign out"
+              className="h-9 w-9"
+            >
               <LogOut className="size-4" />
             </Button>
           </div>
@@ -168,13 +213,21 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 inset-x-0 z-30 h-14 bg-background/80 backdrop-blur-md border-b border-border flex items-center justify-between px-3">
-        <button onClick={() => setMobileOpen(true)} aria-label="Open menu" className="min-h-11 min-w-11 grid place-items-center">
+        <button
+          onClick={() => setMobileOpen(true)}
+          aria-label="Open menu"
+          className="min-h-11 min-w-11 grid place-items-center"
+        >
           <Menu className="size-5" />
         </button>
         <Link to="/dashboard" className="flex items-center gap-2 font-semibold text-sm">
           <Sparkles className="size-4 text-primary" /> CareerOS AI
         </Link>
-        <button onClick={() => setPaletteOpen(true)} aria-label="Search" className="min-h-11 min-w-11 grid place-items-center">
+        <button
+          onClick={() => setPaletteOpen(true)}
+          aria-label="Search"
+          className="min-h-11 min-w-11 grid place-items-center"
+        >
           <Search className="size-5" />
         </button>
       </div>
@@ -199,7 +252,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-export function PageHeader({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
+export function PageHeader({
+  title,
+  description,
+  actions,
+}: {
+  title: string;
+  description?: string;
+  actions?: ReactNode;
+}) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -4 }}
@@ -210,10 +271,14 @@ export function PageHeader({ title, description, actions }: { title: string; des
       <div className="min-w-0">
         <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-balance">{title}</h1>
         {description ? (
-          <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl leading-relaxed">{description}</p>
+          <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl leading-relaxed">
+            {description}
+          </p>
         ) : null}
       </div>
-      {actions ? <div className="flex items-center gap-2 flex-wrap justify-end">{actions}</div> : null}
+      {actions ? (
+        <div className="flex items-center gap-2 flex-wrap justify-end">{actions}</div>
+      ) : null}
     </motion.div>
   );
 }

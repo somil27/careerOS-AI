@@ -1,9 +1,15 @@
 export const typeDefs = /* GraphQL */ `
-  """ISO-8601 timestamp string."""
+  """
+  ISO-8601 timestamp string.
+  """
   scalar DateTime
-  """Opaque cursor for connection pagination."""
+  """
+  Opaque cursor for connection pagination.
+  """
   scalar Cursor
-  """Arbitrary JSON payload."""
+  """
+  Arbitrary JSON payload.
+  """
   scalar JSON
 
   # ────────── Common connection types ──────────
@@ -14,7 +20,10 @@ export const typeDefs = /* GraphQL */ `
     endCursor: Cursor
   }
 
-  enum SortDirection { ASC DESC }
+  enum SortDirection {
+    ASC
+    DESC
+  }
 
   # ────────── User / Profile ──────────
   type Profile {
@@ -68,7 +77,10 @@ export const typeDefs = /* GraphQL */ `
     updatedAt: DateTime!
     activities(first: Int = 20): [ApplicationActivity!]!
   }
-  type ApplicationEdge { cursor: Cursor! node: Application! }
+  type ApplicationEdge {
+    cursor: Cursor!
+    node: Application!
+  }
   type ApplicationConnection {
     edges: [ApplicationEdge!]!
     nodes: [Application!]!
@@ -82,8 +94,17 @@ export const typeDefs = /* GraphQL */ `
     createdAfter: DateTime
     createdBefore: DateTime
   }
-  enum ApplicationSortField { CREATED_AT UPDATED_AT COMPANY ROLE DEADLINE }
-  input ApplicationSort { field: ApplicationSortField! = CREATED_AT direction: SortDirection! = DESC }
+  enum ApplicationSortField {
+    CREATED_AT
+    UPDATED_AT
+    COMPANY
+    ROLE
+    DEADLINE
+  }
+  input ApplicationSort {
+    field: ApplicationSortField! = CREATED_AT
+    direction: SortDirection! = DESC
+  }
   input CreateApplicationInput {
     company: String!
     role: String!
@@ -132,11 +153,32 @@ export const typeDefs = /* GraphQL */ `
     updatedAt: DateTime!
     extractedText: String
   }
-  type ResumeEdge { cursor: Cursor! node: Resume! }
-  type ResumeConnection { edges: [ResumeEdge!]! nodes: [Resume!]! pageInfo: PageInfo! totalCount: Int! }
-  input ResumeFilter { search: String tag: String activeOnly: Boolean }
-  enum ResumeSortField { CREATED_AT UPDATED_AT NAME VERSION DOWNLOAD_COUNT }
-  input ResumeSort { field: ResumeSortField! = CREATED_AT direction: SortDirection! = DESC }
+  type ResumeEdge {
+    cursor: Cursor!
+    node: Resume!
+  }
+  type ResumeConnection {
+    edges: [ResumeEdge!]!
+    nodes: [Resume!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
+  input ResumeFilter {
+    search: String
+    tag: String
+    activeOnly: Boolean
+  }
+  enum ResumeSortField {
+    CREATED_AT
+    UPDATED_AT
+    NAME
+    VERSION
+    DOWNLOAD_COUNT
+  }
+  input ResumeSort {
+    field: ResumeSortField! = CREATED_AT
+    direction: SortDirection! = DESC
+  }
 
   # ────────── AI Analyses (Resume/JobMatch/InterviewCoach/CareerCoach) ──────────
   type AiAnalysis {
@@ -147,9 +189,20 @@ export const typeDefs = /* GraphQL */ `
     output: JSON
     createdAt: DateTime!
   }
-  type AiAnalysisEdge { cursor: Cursor! node: AiAnalysis! }
-  type AiAnalysisConnection { edges: [AiAnalysisEdge!]! nodes: [AiAnalysis!]! pageInfo: PageInfo! totalCount: Int! }
-  input AiAnalysisFilter { kind: String search: String }
+  type AiAnalysisEdge {
+    cursor: Cursor!
+    node: AiAnalysis!
+  }
+  type AiAnalysisConnection {
+    edges: [AiAnalysisEdge!]!
+    nodes: [AiAnalysis!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
+  input AiAnalysisFilter {
+    kind: String
+    search: String
+  }
 
   # ────────── Interview Sessions (mock interviews) ──────────
   type InterviewSession {
@@ -169,9 +222,21 @@ export const typeDefs = /* GraphQL */ `
     feedback: JSON
     createdAt: DateTime!
   }
-  type InterviewSessionEdge { cursor: Cursor! node: InterviewSession! }
-  type InterviewSessionConnection { edges: [InterviewSessionEdge!]! nodes: [InterviewSession!]! pageInfo: PageInfo! totalCount: Int! }
-  input InterviewSessionFilter { interviewType: String company: String status: String }
+  type InterviewSessionEdge {
+    cursor: Cursor!
+    node: InterviewSession!
+  }
+  type InterviewSessionConnection {
+    edges: [InterviewSessionEdge!]!
+    nodes: [InterviewSession!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
+  input InterviewSessionFilter {
+    interviewType: String
+    company: String
+    status: String
+  }
 
   # ────────── Interview Notes ──────────
   type InterviewNote {
@@ -186,8 +251,16 @@ export const typeDefs = /* GraphQL */ `
     interviewDate: DateTime
     createdAt: DateTime!
   }
-  type InterviewNoteEdge { cursor: Cursor! node: InterviewNote! }
-  type InterviewNoteConnection { edges: [InterviewNoteEdge!]! nodes: [InterviewNote!]! pageInfo: PageInfo! totalCount: Int! }
+  type InterviewNoteEdge {
+    cursor: Cursor!
+    node: InterviewNote!
+  }
+  type InterviewNoteConnection {
+    edges: [InterviewNoteEdge!]!
+    nodes: [InterviewNote!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
   input CreateInterviewNoteInput {
     company: String
     round: String
@@ -212,8 +285,16 @@ export const typeDefs = /* GraphQL */ `
     reminderDate: DateTime
     createdAt: DateTime!
   }
-  type ReferralEdge { cursor: Cursor! node: Referral! }
-  type ReferralConnection { edges: [ReferralEdge!]! nodes: [Referral!]! pageInfo: PageInfo! totalCount: Int! }
+  type ReferralEdge {
+    cursor: Cursor!
+    node: Referral!
+  }
+  type ReferralConnection {
+    edges: [ReferralEdge!]!
+    nodes: [Referral!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
   input CreateReferralInput {
     referrerName: String!
     company: String
@@ -225,8 +306,14 @@ export const typeDefs = /* GraphQL */ `
   }
 
   # ────────── Analytics ──────────
-  type StatusBucket { status: String! count: Int! }
-  type Timepoint { date: String! count: Int! }
+  type StatusBucket {
+    status: String!
+    count: Int!
+  }
+  type Timepoint {
+    date: String!
+    count: Int!
+  }
   type Analytics {
     totalApplications: Int!
     activeApplications: Int!
@@ -250,20 +337,32 @@ export const typeDefs = /* GraphQL */ `
     createdAt: DateTime!
     read: Boolean!
   }
-  type NotificationConnection { nodes: [Notification!]! pageInfo: PageInfo! totalCount: Int! }
+  type NotificationConnection {
+    nodes: [Notification!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
 
   # ────────── Root ──────────
   type Query {
-    """API metadata."""
+    """
+    API metadata.
+    """
     apiInfo: JSON!
 
-    """Currently authenticated user."""
+    """
+    Currently authenticated user.
+    """
     me: Me
 
-    """Fetch a profile by id — subject to RLS (own profile in most projects)."""
+    """
+    Fetch a profile by id — subject to RLS (own profile in most projects).
+    """
     profile(id: ID!): Profile
 
-    """List the current user's applications."""
+    """
+    List the current user's applications.
+    """
     applications(
       first: Int = 20
       after: Cursor
@@ -272,7 +371,9 @@ export const typeDefs = /* GraphQL */ `
     ): ApplicationConnection!
     application(id: ID!): Application
 
-    """List the current user's resumes."""
+    """
+    List the current user's resumes.
+    """
     resumes(
       first: Int = 20
       after: Cursor
@@ -281,36 +382,46 @@ export const typeDefs = /* GraphQL */ `
     ): ResumeConnection!
     resume(id: ID!): Resume
 
-    """List AI analyses (Resume Analyzer, Job Match, Interview Coach, Career Coach, etc.)."""
-    aiAnalyses(
-      first: Int = 20
-      after: Cursor
-      filter: AiAnalysisFilter
-    ): AiAnalysisConnection!
+    """
+    List AI analyses (Resume Analyzer, Job Match, Interview Coach, Career Coach, etc.).
+    """
+    aiAnalyses(first: Int = 20, after: Cursor, filter: AiAnalysisFilter): AiAnalysisConnection!
 
-    """Convenience shortcuts scoped to a single AI kind."""
+    """
+    Convenience shortcuts scoped to a single AI kind.
+    """
     resumeAnalyses(first: Int = 20, after: Cursor): AiAnalysisConnection!
     jobMatches(first: Int = 20, after: Cursor): AiAnalysisConnection!
     interviewCoachSessions(first: Int = 20, after: Cursor): AiAnalysisConnection!
     careerCoachPlans(first: Int = 20, after: Cursor): AiAnalysisConnection!
 
-    """Mock interview sessions."""
+    """
+    Mock interview sessions.
+    """
     interviewSessions(
       first: Int = 20
       after: Cursor
       filter: InterviewSessionFilter
     ): InterviewSessionConnection!
 
-    """Written interview retrospectives."""
+    """
+    Written interview retrospectives.
+    """
     interviewNotes(first: Int = 20, after: Cursor): InterviewNoteConnection!
 
-    """Referral pipeline."""
+    """
+    Referral pipeline.
+    """
     referrals(first: Int = 20, after: Cursor): ReferralConnection!
 
-    """Aggregated analytics for the current user."""
+    """
+    Aggregated analytics for the current user.
+    """
     analytics: Analytics!
 
-    """Recent activity surfaced as notifications."""
+    """
+    Recent activity surfaced as notifications.
+    """
     notifications(first: Int = 20, after: Cursor): NotificationConnection!
   }
 
@@ -327,7 +438,9 @@ export const typeDefs = /* GraphQL */ `
     createInterviewNote(input: CreateInterviewNoteInput!): InterviewNote!
     deleteInterviewNote(id: ID!): Boolean!
 
-    """Delete an AI analysis (resume analysis, job match, etc.)."""
+    """
+    Delete an AI analysis (resume analysis, job match, etc.).
+    """
     deleteAiAnalysis(id: ID!): Boolean!
   }
 `;

@@ -10,15 +10,26 @@ export const Route = createFileRoute("/_authenticated/extension")({
   head: () => ({
     meta: [
       { title: "Chrome Extension · CareerOS AI" },
-      { name: "description", content: "Install the CareerOS AI Chrome extension and save jobs from LinkedIn, Indeed, Wellfound, and more with one click." },
+      {
+        name: "description",
+        content:
+          "Install the CareerOS AI Chrome extension and save jobs from LinkedIn, Indeed, Wellfound, and more with one click.",
+      },
     ],
   }),
   component: ExtensionPage,
 });
 
 const SUPPORTED = [
-  "LinkedIn Jobs", "Wellfound", "Internshala", "Naukri",
-  "Indeed", "Glassdoor", "Greenhouse", "Lever", "Ashby",
+  "LinkedIn Jobs",
+  "Wellfound",
+  "Internshala",
+  "Naukri",
+  "Indeed",
+  "Glassdoor",
+  "Greenhouse",
+  "Lever",
+  "Ashby",
 ];
 
 function ExtensionPage() {
@@ -67,7 +78,11 @@ function ExtensionPage() {
     // Fallback: if the extension never acks within 3s, surface guidance.
     setTimeout(() => {
       setLinkState((current) => (current === "linking" ? "error" : current));
-      setError((prev) => prev ?? "No response from the extension. Make sure it's installed and enabled, then reload this page.");
+      setError(
+        (prev) =>
+          prev ??
+          "No response from the extension. Make sure it's installed and enabled, then reload this page.",
+      );
     }, 3000);
   }
 
@@ -79,29 +94,37 @@ function ExtensionPage() {
           <h1 className="text-2xl font-semibold tracking-tight">CareerOS AI · Chrome Extension</h1>
         </div>
         <p className="text-muted-foreground text-sm">
-          Save internships and jobs from any supported job portal directly into your Applications, with duplicate
-          detection, auto-tagging, and one-tap AI Job Match & Resume Match.
+          Save internships and jobs from any supported job portal directly into your Applications,
+          with duplicate detection, auto-tagging, and one-tap AI Job Match & Resume Match.
         </p>
       </header>
 
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Download className="size-4 text-primary" /> 1 · Install the extension</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Download className="size-4 text-primary" /> 1 · Install the extension
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <p className="text-muted-foreground">
-              Download the packaged extension, unzip it, then load it as an unpacked extension in any Chromium
-              browser (Chrome, Edge, Brave, Arc).
+              Download the packaged extension, unzip it, then load it as an unpacked extension in
+              any Chromium browser (Chrome, Edge, Brave, Arc).
             </p>
             <Button onClick={downloadExtension} className="w-full sm:w-auto">
               <Download className="size-4" /> Download .zip
             </Button>
             <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-1">
               <li>Unzip the downloaded file.</li>
-              <li>Open <code className="rounded bg-muted px-1">chrome://extensions</code>.</li>
-              <li>Toggle <b>Developer mode</b> in the top right.</li>
-              <li>Click <b>Load unpacked</b> and pick the unzipped folder.</li>
+              <li>
+                Open <code className="rounded bg-muted px-1">chrome://extensions</code>.
+              </li>
+              <li>
+                Toggle <b>Developer mode</b> in the top right.
+              </li>
+              <li>
+                Click <b>Load unpacked</b> and pick the unzipped folder.
+              </li>
               <li>Return to this page to link your account.</li>
             </ol>
           </CardContent>
@@ -109,27 +132,47 @@ function ExtensionPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Link2 className="size-4 text-primary" /> 2 · Link your account</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Link2 className="size-4 text-primary" /> 2 · Link your account
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-center gap-2 text-xs">
               <span>Extension status:</span>
               {extPresent ? (
-                <Badge variant="secondary" className="gap-1"><CheckCircle2 className="size-3 text-emerald-500" /> Detected v{extPresent.version}</Badge>
+                <Badge variant="secondary" className="gap-1">
+                  <CheckCircle2 className="size-3 text-emerald-500" /> Detected v
+                  {extPresent.version}
+                </Badge>
               ) : (
                 <Badge variant="outline">Not detected on this page</Badge>
               )}
             </div>
-            <Button onClick={linkNow} disabled={!extPresent || linkState === "linking"} className="w-full sm:w-auto">
-              <Link2 className="size-4" /> {linkState === "linking" ? "Linking…" : linkState === "linked" ? "Linked ✓" : "Sign in the extension"}
+            <Button
+              onClick={linkNow}
+              disabled={!extPresent || linkState === "linking"}
+              className="w-full sm:w-auto"
+            >
+              <Link2 className="size-4" />{" "}
+              {linkState === "linking"
+                ? "Linking…"
+                : linkState === "linked"
+                  ? "Linked ✓"
+                  : "Sign in the extension"}
             </Button>
             {linkState === "linked" ? (
-              <p className="text-emerald-600 text-xs flex items-center gap-1"><CheckCircle2 className="size-3.5" /> Your extension is now signed in as you. Open a job posting on any supported site and click the extension icon.</p>
+              <p className="text-emerald-600 text-xs flex items-center gap-1">
+                <CheckCircle2 className="size-3.5" /> Your extension is now signed in as you. Open a
+                job posting on any supported site and click the extension icon.
+              </p>
             ) : null}
             {error ? <p className="text-destructive text-xs">{error}</p> : null}
             <p className="text-xs text-muted-foreground flex items-start gap-1.5">
               <Shield className="size-3.5 mt-0.5" />
-              <span>Your session token is stored only in the extension's local storage on this device. Sign out from the popup at any time.</span>
+              <span>
+                Your session token is stored only in the extension's local storage on this device.
+                Sign out from the popup at any time.
+              </span>
             </p>
           </CardContent>
         </Card>
@@ -137,7 +180,9 @@ function ExtensionPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Sparkles className="size-4 text-primary" /> What it does</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="size-4 text-primary" /> What it does
+          </CardTitle>
         </CardHeader>
         <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
           <ul className="space-y-1.5 text-muted-foreground">
@@ -161,7 +206,11 @@ function ExtensionPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-1.5">
-            {SUPPORTED.map((s) => <Badge key={s} variant="secondary">{s}</Badge>)}
+            {SUPPORTED.map((s) => (
+              <Badge key={s} variant="secondary">
+                {s}
+              </Badge>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -172,7 +221,10 @@ function ExtensionPage() {
 function downloadExtension() {
   fetch("/careeros-extension.zip")
     .then((res) => {
-      if (!res.ok) throw new Error(`Download failed (${res.status}). Run \`bun run extension/build.mjs\` to build it first.`);
+      if (!res.ok)
+        throw new Error(
+          `Download failed (${res.status}). Run \`bun run extension/build.mjs\` to build it first.`,
+        );
       return res.blob();
     })
     .then((blob) => {

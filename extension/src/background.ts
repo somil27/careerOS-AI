@@ -51,7 +51,9 @@ chrome.runtime.onMessage.addListener((msg: ExtMessage, _sender, sendResponse) =>
             title: "Saved to CareerOS",
             message: `${msg.job.role ?? "Job"} @ ${msg.job.company ?? "Unknown"}`,
           });
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
         return;
       }
       if (msg.type === "jobs:recent") {

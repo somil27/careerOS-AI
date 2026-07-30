@@ -31,19 +31,19 @@ const token = data.session?.access_token;
 
 ## Modules
 
-| Module | Query | Mutations |
-| --- | --- | --- |
-| User | `me`, `profile(id)` | `updateProfile` |
-| Applications | `applications(...)`, `application(id)` | `createApplication`, `updateApplication`, `deleteApplication` |
-| Resumes | `resumes(...)`, `resume(id)` | — (uploads go through the existing REST/storage flow) |
-| Resume Analysis | `resumeAnalyses(...)` | `deleteAiAnalysis` |
-| Job Match | `jobMatches(...)` | `deleteAiAnalysis` |
-| Interview Coach | `interviewCoachSessions(...)`, `interviewSessions(...)` | `deleteAiAnalysis` |
-| Career Coach | `careerCoachPlans(...)` | `deleteAiAnalysis` |
-| Referrals | `referrals(...)` | `createReferral`, `deleteReferral` |
-| Interview Notes | `interviewNotes(...)` | `createInterviewNote`, `deleteInterviewNote` |
-| Analytics | `analytics` | — |
-| Notifications | `notifications(...)` | — |
+| Module          | Query                                                   | Mutations                                                     |
+| --------------- | ------------------------------------------------------- | ------------------------------------------------------------- |
+| User            | `me`, `profile(id)`                                     | `updateProfile`                                               |
+| Applications    | `applications(...)`, `application(id)`                  | `createApplication`, `updateApplication`, `deleteApplication` |
+| Resumes         | `resumes(...)`, `resume(id)`                            | — (uploads go through the existing REST/storage flow)         |
+| Resume Analysis | `resumeAnalyses(...)`                                   | `deleteAiAnalysis`                                            |
+| Job Match       | `jobMatches(...)`                                       | `deleteAiAnalysis`                                            |
+| Interview Coach | `interviewCoachSessions(...)`, `interviewSessions(...)` | `deleteAiAnalysis`                                            |
+| Career Coach    | `careerCoachPlans(...)`                                 | `deleteAiAnalysis`                                            |
+| Referrals       | `referrals(...)`                                        | `createReferral`, `deleteReferral`                            |
+| Interview Notes | `interviewNotes(...)`                                   | `createInterviewNote`, `deleteInterviewNote`                  |
+| Analytics       | `analytics`                                             | —                                                             |
+| Notifications   | `notifications(...)`                                    | —                                                             |
 
 ## Pagination, filtering, sorting
 
@@ -58,21 +58,51 @@ const token = data.session?.access_token;
 query Dashboard {
   me {
     email
-    profile { fullName targetRole }
-    stats { applications interviews }
+    profile {
+      fullName
+      targetRole
+    }
+    stats {
+      applications
+      interviews
+    }
   }
-  applications(first: 10, filter: { status: "interview" }, sort: { field: DEADLINE, direction: ASC }) {
+  applications(
+    first: 10
+    filter: { status: "interview" }
+    sort: { field: DEADLINE, direction: ASC }
+  ) {
     totalCount
     edges {
       cursor
-      node { id company role status deadline activities(first: 3) { type message createdAt } }
+      node {
+        id
+        company
+        role
+        status
+        deadline
+        activities(first: 3) {
+          type
+          message
+          createdAt
+        }
+      }
     }
-    pageInfo { hasNextPage endCursor }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
   }
   analytics {
     totalApplications
-    byStatus { status count }
-    applicationsPerWeek { date count }
+    byStatus {
+      status
+      count
+    }
+    applicationsPerWeek {
+      date
+      count
+    }
     averageInterviewScore
   }
 }

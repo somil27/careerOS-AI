@@ -82,7 +82,8 @@ export async function callGemini(
   } catch (err: any) {
     const status = err?.status ?? err?.response?.status;
     if (status === 429) throw new Error("Rate limit reached. Please try again shortly.");
-    if (status === 402 || status === 403) throw new Error("Gemini API access denied. Check your GEMINI_API_KEY and billing.");
+    if (status === 402 || status === 403)
+      throw new Error("Gemini API access denied. Check your GEMINI_API_KEY and billing.");
     throw new Error(`Gemini error: ${err?.message ?? String(err)}`);
   }
 }
@@ -90,7 +91,10 @@ export async function callGemini(
 /** Parse Gemini JSON output, tolerating ```json fences. */
 export function parseJSON<T>(s: string, fallback: T): T {
   try {
-    const cleaned = s.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+    const cleaned = s
+      .replace(/^```json\s*/i, "")
+      .replace(/```$/, "")
+      .trim();
     return JSON.parse(cleaned) as T;
   } catch {
     return fallback;
