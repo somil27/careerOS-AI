@@ -1,17 +1,17 @@
 # syntax=docker/dockerfile:1.7
 
 # --- Build stage ---------------------------------------------------------
-FROM oven/bun:1.1.34-alpine AS build
+FROM node:20-alpine AS build
 WORKDIR /app
 
 # Install deps against the lockfile for reproducible builds.
-COPY package.json bun.lock bunfig.toml ./
-RUN bun install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Copy the rest of the source and build.
 COPY . .
 ENV NODE_ENV=production
-RUN bun run build
+RUN npm run build
 
 # --- Runtime stage -------------------------------------------------------
 FROM node:20-alpine AS runtime
