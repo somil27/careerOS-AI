@@ -132,9 +132,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             to="/dashboard"
             className="flex items-center gap-2 font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
           >
-            <div className="size-8 rounded-lg bg-primary text-primary-foreground grid place-items-center shadow-card">
-              <Sparkles className="size-4" />
-            </div>
+            <img src="/logo.png" alt="CareerOS AI Logo" className="size-8 rounded-lg object-contain bg-white dark:bg-white/90 p-0.5" />
             <span>CareerOS AI</span>
           </Link>
           <button
@@ -221,7 +219,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Menu className="size-5" />
         </button>
         <Link to="/dashboard" className="flex items-center gap-2 font-semibold text-sm">
-          <Sparkles className="size-4 text-primary" /> CareerOS AI
+          <img src="/logo.png" alt="Logo" className="size-5 object-contain bg-white rounded dark:bg-white/90 p-0.5" /> CareerOS AI
         </Link>
         <button
           onClick={() => setPaletteOpen(true)}

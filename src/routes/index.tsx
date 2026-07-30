@@ -69,9 +69,7 @@ function Landing() {
     <div className="min-h-screen bg-hero-grad">
       <header className="mx-auto max-w-7xl px-6 py-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <div className="size-8 rounded-lg bg-primary text-primary-foreground grid place-items-center shadow-card">
-            <Sparkles className="size-4" />
-          </div>
+          <img src="/logo.png" alt="CareerOS AI Logo" className="size-8 rounded-lg object-contain bg-white dark:bg-white/90 p-0.5" />
           <span>CareerOS AI</span>
         </Link>
         <nav className="flex items-center gap-3">
@@ -145,7 +143,10 @@ function Landing() {
 
       <footer className="border-t border-border">
         <div className="mx-auto max-w-7xl px-6 py-8 flex items-center justify-between text-sm text-muted-foreground">
-          <span>© {new Date().getFullYear()} CareerOS AI</span>
+          <span className="flex items-center gap-2">
+            <img src="/logo.png" alt="Logo" className="size-4 object-contain bg-white rounded dark:bg-white/90 p-[1px]" />
+            © {new Date().getFullYear()} CareerOS AI
+          </span>
           <Link to="/auth" className="hover:text-foreground transition">
             Sign in →
           </Link>

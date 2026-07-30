@@ -113,9 +113,7 @@ function AuthPage() {
           to="/"
           className="flex items-center gap-2 font-semibold tracking-tight justify-center mb-8"
         >
-          <div className="size-9 rounded-lg bg-primary text-primary-foreground grid place-items-center shadow-card">
-            <Sparkles className="size-4" />
-          </div>
+          <img src="/logo.png" alt="CareerOS AI Logo" className="size-9 rounded-lg object-contain bg-white dark:bg-white/90 p-0.5" />
           <span className="text-lg">CareerOS AI</span>
         </Link>
 
