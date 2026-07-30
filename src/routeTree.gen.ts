@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as ApiGraphqlRouteImport } from './routes/api/graphql'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedResumesRouteImport } from './routes/_authenticated/resumes'
@@ -49,6 +50,11 @@ const RSlugRoute = RSlugRouteImport.update({
   id: '/r/$slug',
   path: '/r/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
 } as any)
 const ApiGraphqlRoute = ApiGraphqlRouteImport.update({
   id: '/api/graphql',
@@ -147,7 +153,7 @@ const AuthenticatedAiCareerCoachRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/applications': typeof AuthenticatedApplicationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/resumes': typeof AuthenticatedResumesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/graphql': typeof ApiGraphqlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/r/$slug': typeof RSlugRoute
   '/ai/career-coach': typeof AuthenticatedAiCareerCoachRoute
   '/ai/cover-letter': typeof AuthenticatedAiCoverLetterRoute
@@ -169,7 +176,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/applications': typeof AuthenticatedApplicationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/resumes': typeof AuthenticatedResumesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/graphql': typeof ApiGraphqlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/r/$slug': typeof RSlugRoute
   '/ai/career-coach': typeof AuthenticatedAiCareerCoachRoute
   '/ai/cover-letter': typeof AuthenticatedAiCoverLetterRoute
@@ -193,7 +201,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/applications': typeof AuthenticatedApplicationsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/_authenticated/resumes': typeof AuthenticatedResumesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/graphql': typeof ApiGraphqlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/r/$slug': typeof RSlugRoute
   '/_authenticated/ai/career-coach': typeof AuthenticatedAiCareerCoachRoute
   '/_authenticated/ai/cover-letter': typeof AuthenticatedAiCoverLetterRoute
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/resumes'
     | '/settings'
     | '/api/graphql'
+    | '/auth/callback'
     | '/r/$slug'
     | '/ai/career-coach'
     | '/ai/cover-letter'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/resumes'
     | '/settings'
     | '/api/graphql'
+    | '/auth/callback'
     | '/r/$slug'
     | '/ai/career-coach'
     | '/ai/cover-letter'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/_authenticated/resumes'
     | '/_authenticated/settings'
     | '/api/graphql'
+    | '/auth/callback'
     | '/r/$slug'
     | '/_authenticated/ai/career-coach'
     | '/_authenticated/ai/cover-letter'
@@ -286,7 +298,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
   ApiGraphqlRoute: typeof ApiGraphqlRoute
   RSlugRoute: typeof RSlugRoute
 }
@@ -320,6 +332,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/r/$slug'
       preLoaderRoute: typeof RSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/api/graphql': {
       id: '/api/graphql'
@@ -484,10 +503,20 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AuthRouteChildren {
+  AuthCallbackRoute: typeof AuthCallbackRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCallbackRoute: AuthCallbackRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
   ApiGraphqlRoute: ApiGraphqlRoute,
   RSlugRoute: RSlugRoute,
 }

@@ -164,6 +164,9 @@ Managed by Supabase in production; set locally in `.env`.
 | `SUPABASE_SERVICE_ROLE_KEY`     | Server (`.server.ts` only) | Admin client that bypasses RLS.                        |
 | `GEMINI_API_KEY`                | Server                     | Google Gemini credentials.                             |
 
+**OAuth Configuration:**
+Google OAuth requires configuring the **Client ID** and **Client Secret** within the Supabase Dashboard (Authentication -> Providers -> Google), along with the authorized redirect URI (e.g. `https://<your-project>.supabase.co/auth/v1/callback`). No local `.env` variables are needed for OAuth as Supabase handles the provider configuration on its server.
+
 Additional connector-provided secrets (e.g. `GOOGLE_MAIL_API_KEY`) are
 injected automatically when you link a connection in the CareerOS UI.
 
