@@ -36,7 +36,7 @@ const questionsSchema = {
 // ============= Start Interview =============
 export const startInterview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
+  .validator((raw: unknown) =>
     z.object({
       interview_type: InterviewType,
       company: z.string().max(200).optional().default(""),
@@ -84,7 +84,7 @@ export const startInterview = createServerFn({ method: "POST" })
 // ============= Follow-up question =============
 export const nextQuestion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
+  .validator((raw: unknown) =>
     z.object({
       session_id: z.string().uuid(),
       last_answer: z.string().max(8000),
@@ -161,7 +161,7 @@ const analysisSchema = {
 
 export const analyzeInterview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
+  .validator((raw: unknown) =>
     z.object({
       session_id: z.string().uuid(),
       client_metrics: z.object({
@@ -245,7 +245,7 @@ export const listInterviewSessions = createServerFn({ method: "GET" })
 
 export const deleteInterviewSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => z.object({ id: z.string().uuid() }).parse(raw))
+  .validator((raw: unknown) => z.object({ id: z.string().uuid() }).parse(raw))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("interview_sessions").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -255,7 +255,7 @@ export const deleteInterviewSession = createServerFn({ method: "POST" })
 // ============= Voice transcription (Google Gemini audio) =============
 export const transcribeAudio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
+  .validator((raw: unknown) =>
     z.object({
       audio_base64: z.string().min(10),
       mime: z.string().default("audio/webm"),

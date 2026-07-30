@@ -5,7 +5,7 @@ import { callGemini } from "@/lib/gemini";
 
 export const generateCoverLetter = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     resume_text: z.string().min(20),
     job_description: z.string().min(20),
     company: z.string().min(1),

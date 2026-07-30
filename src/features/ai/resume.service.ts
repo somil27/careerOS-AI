@@ -32,7 +32,7 @@ function verifyResumeAnalysis(x: any): ResumeAnalysis {
 
 export const analyzeResume = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     resume_text: z.string().min(20),
     target_role: z.string().optional(),
     job_description: z.string().optional(),
@@ -69,7 +69,7 @@ ${data.job_description ? `JOB DESCRIPTION:\n${data.job_description}\n\n` : ""}RE
 
 export const compareResumes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     resume_a: z.string().min(20),
     resume_b: z.string().min(20),
     label_a: z.string().optional(),

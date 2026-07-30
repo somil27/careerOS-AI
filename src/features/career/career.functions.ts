@@ -12,7 +12,7 @@ export const getCareerProfile = createServerFn({ method: "GET" })
 
 export const upsertCareerProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     target_role: z.string().nullable().optional(),
     years_experience: z.number().nullable().optional(),
     location: z.string().nullable().optional(),
@@ -51,7 +51,7 @@ const goalInput = z.object({
 
 export const createGoal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => goalInput.parse(d))
+  .validator((d: unknown) => goalInput.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("career_goals").insert({ user_id: context.userId, ...data }).select("*").single();
@@ -61,7 +61,7 @@ export const createGoal = createServerFn({ method: "POST" })
 
 export const updateGoal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     id: z.string().uuid(),
     patch: goalInput.partial(),
   }).parse(d))
@@ -74,7 +74,7 @@ export const updateGoal = createServerFn({ method: "POST" })
 
 export const deleteGoal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("career_goals").delete().eq("id", data.id).eq("user_id", context.userId);
     if (error) throw new Error(error.message);
@@ -103,7 +103,7 @@ const skillInput = z.object({
 
 export const createSkill = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => skillInput.parse(d))
+  .validator((d: unknown) => skillInput.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("career_skills").insert({ user_id: context.userId, ...data }).select("*").single();
@@ -113,7 +113,7 @@ export const createSkill = createServerFn({ method: "POST" })
 
 export const updateSkill = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     id: z.string().uuid(),
     patch: skillInput.partial(),
   }).parse(d))
@@ -126,7 +126,7 @@ export const updateSkill = createServerFn({ method: "POST" })
 
 export const deleteSkill = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("career_skills").delete().eq("id", data.id).eq("user_id", context.userId);
     if (error) throw new Error(error.message);
@@ -181,7 +181,7 @@ export const getCareerDashboard = createServerFn({ method: "GET" })
 // ===== Adopt AI recommendations =====
 export const adoptRecommendedGoal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     title: z.string(), description: z.string().optional(), category: z.string().optional(),
     priority: z.enum(["high", "medium", "low"]).default("medium"), timeframe_weeks: z.number().optional(),
   }).parse(d))
@@ -200,7 +200,7 @@ export const adoptRecommendedGoal = createServerFn({ method: "POST" })
 
 export const adoptRecommendedSkill = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     name: z.string(), category: z.string().optional(),
     current_level: z.number().default(0), target_level: z.number().default(100),
     priority: z.enum(["high", "medium", "low"]).default("medium"),

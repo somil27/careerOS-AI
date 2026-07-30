@@ -7,7 +7,7 @@ import { emptyInterviewPrep } from "./types";
 
 export const interviewPrep = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     company: z.string().min(1),
     role: z.string().min(1),
     job_description: z.string().optional(),
@@ -49,7 +49,7 @@ ${data.job_description ? `JOB DESCRIPTION:\n${data.job_description}\n\n` : ""}${
 
 export const generateStarAnswer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     question: z.string().min(3),
     notes: z.string().min(3),
     role: z.string().optional(),
@@ -72,7 +72,7 @@ export const generateStarAnswer = createServerFn({ method: "POST" })
 
 export const scoreInterviewAnswer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     question: z.string().min(3),
     answer: z.string().min(3),
     kind: z.enum(["behavioral", "technical", "coding", "hr"]).default("behavioral"),

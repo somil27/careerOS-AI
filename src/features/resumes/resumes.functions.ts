@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 export const getSharedResume = createServerFn({ method: "POST" })
-  .inputValidator((d: { slug: string; referrer?: string; userAgent?: string }) =>
+  .validator((d: { slug: string; referrer?: string; userAgent?: string }) =>
     z.object({ slug: z.string().min(1), referrer: z.string().optional(), userAgent: z.string().optional() }).parse(d),
   )
   .handler(async ({ data }) => {

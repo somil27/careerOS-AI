@@ -18,7 +18,7 @@ function verifyCareerPlan(x: any): CareerPlan {
 
 export const careerCoach = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
+  .validator((d: unknown) => z.object({
     resume_text: z.string().optional(),
     target_role: z.string().optional(),
     years_experience: z.number().optional(),
